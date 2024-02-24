@@ -28,6 +28,6 @@ namespace CatalogDb.API.Entities
         //// Não é necessário explicitar os atributos abaixo, pois o EF Core já realizará o mapeamento do relacionamento
         //// Define relacionamento 1:N
         //public int CategoryId { get; set; } // FK
-        //public Category? Category { get; set; } // Product está mapeado para Category
+        public Category? Category { get; set; } // Product está mapeado para Category
     }
 }

@@ -1,4 +1,6 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using CatalogDb.API.Context;
+using CatalogDb.API.Entities;
+using Microsoft.AspNetCore.Mvc;
 
 namespace CatalogDb.API.Controllers
 {
@@ -6,5 +8,11 @@ namespace CatalogDb.API.Controllers
     [ApiController]
     public class ProductsController : ControllerBase
     {
+        private readonly AppDbContext _context;
+
+        public ProductsController(AppDbContext context)
+        {
+            _context = context;
+        }
     }
 }

@@ -37,5 +37,18 @@ namespace CatalogDb.API.Controllers
             }
             return products;
         }
+
+        [HttpPost]
+        public ActionResult<Product> Post(Product product)
+        {
+            if (product == null)
+            {
+                return BadRequest();
+            }
+
+            _context.Products.Add(product); // Inclui product no contexto do EF Core (Memória)
+            _context.SaveChanges(); // Salva no BD
+            return new CreatedAtRouteResult(nameof(Get), new { id = product.Id }, product);
+        }
     }
 }

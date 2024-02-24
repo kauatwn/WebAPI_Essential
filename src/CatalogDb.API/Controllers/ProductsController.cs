@@ -14,5 +14,28 @@ namespace CatalogDb.API.Controllers
         {
             _context = context;
         }
+
+        [HttpGet]
+        public ActionResult<IEnumerable<Product>> Get()
+        {
+            var products = _context.Products.ToList();
+
+            if (products == null)
+            {
+                return NotFound("Products not found.");
+            }
+            return products;
+        }
+
+        [HttpGet("{id:int}")]
+        public ActionResult<Product> Get(int id)
+        {
+            var products = _context.Products.FirstOrDefault(p => p.Id == id);
+            if (products == null)
+            {
+                return NotFound("Product not found.");
+            }
+            return products;
+        }
     }
 }

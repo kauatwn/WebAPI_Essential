@@ -27,7 +27,7 @@ namespace CatalogDb.API.Controllers
             return products;
         }
 
-        [HttpGet("{id:int}")]
+        [HttpGet("{id:int}", Name ="ObterProduto")]
         public ActionResult<Product> Get(int id)
         {
             var products = _context.Products.FirstOrDefault(p => p.Id == id);
@@ -48,7 +48,7 @@ namespace CatalogDb.API.Controllers
 
             _context.Products.Add(product); // Inclui product no contexto do EF Core (Memória)
             _context.SaveChanges(); // Salva no BD
-            return new CreatedAtRouteResult(nameof(Get), new { id = product.Id }, product);
+            return new CreatedAtRouteResult("ObterProduto", new { id = product.Id }, product);
         }
     }
 }

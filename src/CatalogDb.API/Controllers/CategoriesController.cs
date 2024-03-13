@@ -32,7 +32,7 @@ namespace CatalogDb.API.Controllers
         }
 
         [HttpGet("products")]
-        public ActionResult<IEnumerable<Category>> GetProductsByCategory()
+        public ActionResult<IEnumerable<Category>> GetCategoriesWithProducts()
         {
             return _context.Categories.Include(p => p.Products).AsNoTracking().ToList();
         }

@@ -28,6 +28,12 @@ namespace CatalogDb.API.Controllers
             return categories;
         }
 
+        [HttpGet("products")]
+        public ActionResult<IEnumerable<Category>> GetProductsByCategory()
+        {
+            return _context.Categories.Include(p => p.Products).ToList();
+        }
+
 
         [HttpGet("{id:int}", Name = "ObterCategoria")]
         public ActionResult<Category> Get(int id)

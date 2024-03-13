@@ -19,47 +19,75 @@ namespace CatalogDb.API.Controllers
         [HttpGet]
         public ActionResult<IEnumerable<Category>> Get()
         {
-            // Consultas utilizando o EF é feita através do cache. É realizado o tracking das entidades para acompanhar os estados.
-            // O método AsNoTracking não deixa armazenado entidades no cache e busca diretamente no BD, melhorando a performance.
-            // Utilize AsNoTracking somente para consultas de leitura.
-            var categories = _context.Categories.AsNoTracking().ToList();
-
-            if (categories == null)
+            try
             {
-                return NotFound("Categories not found.");
+                // Consultas utilizando o EF é feita através do cache. É realizado o tracking das entidades para acompanhar os estados.
+                // O método AsNoTracking não deixa armazenado entidades no cache e busca diretamente no BD, melhorando a performance.
+                // Utilize AsNoTracking somente para consultas de leitura.
+                var categories = _context.Categories.AsNoTracking().ToList();
+
+                if (categories == null)
+                {
+                    return NotFound("Categories not found.");
+                }
+                return categories;
             }
-            return categories;
+            // Exception genérica para simular um erro específico que será capturado.
+            catch (Exception)
+            {
+                return StatusCode(StatusCodes.Status500InternalServerError, "A problem occurred while processing your request.");
+            }
         }
 
         [HttpGet("products")]
         public ActionResult<IEnumerable<Category>> GetCategoriesWithProducts()
         {
-            return _context.Categories.Include(p => p.Products).AsNoTracking().ToList();
+            try
+            {
+                return _context.Categories.Include(p => p.Products).AsNoTracking().ToList();
+            }
+            catch (Exception)
+            {
+                return StatusCode(StatusCodes.Status500InternalServerError, "A problem occurred while processing your request.");
+            }
         }
-
 
         [HttpGet("{id:int}", Name = "ObterCategoria")]
         public ActionResult<Category> Get(int id)
         {
-            var categoria = _context.Categories.FirstOrDefault(p => p.Id == id);
-
-            if (categoria == null)
+            try
             {
-                return NotFound("Category not found.");
+                var categoria = _context.Categories.FirstOrDefault(p => p.Id == id);
+
+                if (categoria == null)
+                {
+                    return NotFound("Category not found.");
+                }
+                return Ok(categoria);
             }
-            return Ok(categoria);
+            catch (Exception)
+            {
+                return StatusCode(StatusCodes.Status500InternalServerError, "A problem occurred while processing your request.");
+            }
         }
 
         [HttpPost]
         public ActionResult Post(Category category)
         {
-            if (category is null)
-                return BadRequest();
+            try
+            {
+                if (category is null)
+                    return BadRequest();
 
-            _context.Categories.Add(category);
-            _context.SaveChanges();
+                _context.Categories.Add(category);
+                _context.SaveChanges();
 
-            return new CreatedAtRouteResult("ObterCategoria", new { id = category.Id }, category);
+                return new CreatedAtRouteResult("ObterCategoria", new { id = category.Id }, category);
+            }
+            catch (Exception)
+            {
+                return StatusCode(StatusCodes.Status500InternalServerError, "A problem occurred while processing your request.");
+            }
         }
 
         [HttpPut("{id:int}")]
@@ -77,15 +105,22 @@ namespace CatalogDb.API.Controllers
         [HttpDelete("{id:int}")]
         public ActionResult Delete(int id)
         {
-            var categoria = _context.Categories.FirstOrDefault(p => p.Id == id);
-
-            if (categoria == null)
+            try
             {
-                return NotFound("Category not found.");
+                var categoria = _context.Categories.FirstOrDefault(p => p.Id == id);
+
+                if (categoria == null)
+                {
+                    return NotFound("Category not found.");
+                }
+                _context.Categories.Remove(categoria);
+                _context.SaveChanges();
+                return Ok(categoria);
             }
-            _context.Categories.Remove(categoria);
-            _context.SaveChanges();
-            return Ok(categoria);
+            catch (Exception)
+            {
+                return StatusCode(StatusCodes.Status500InternalServerError, "A problem occurred while processing your request.");
+            }
         }
     }
 }

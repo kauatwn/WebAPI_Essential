@@ -10,12 +10,24 @@ namespace CatalogDb.API.Repositories
 
         public IEnumerable<Category> GetCategories()
         {
-            return _context.Categories.AsNoTracking().ToList();
+            var categories = _context.Categories.AsNoTracking().ToList();
+
+            if (categories == null)
+            {
+                throw new ArgumentNullException(nameof(categories));
+            }
+            return categories;
         }
 
         public Category GetCategory(int id)
         {
-           return _context.Categories.AsNoTracking().FirstOrDefault(c => c.Id == id);
+           var category = _context.Categories.AsNoTracking().FirstOrDefault(c => c.Id == id);
+
+            if (category == null)
+            {
+                throw new ArgumentNullException(nameof(category));
+            }
+            return category;
         }
         public Category Create(Category category)
         {

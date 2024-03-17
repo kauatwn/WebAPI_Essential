@@ -1,5 +1,6 @@
 ﻿using CatalogDb.API.Context;
 using CatalogDb.API.Entities;
+using CatalogDb.API.Repositories;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
@@ -7,125 +8,49 @@ namespace CatalogDb.API.Controllers
 {
     [Route("[controller]")]
     [ApiController]
-    public class CategoriesController(AppDbContext context) : ControllerBase
+    public class CategoriesController(ICategoryRepository repository) : ControllerBase
     {
-        private readonly AppDbContext _context = context;
+        private readonly ICategoryRepository _repository = repository;
 
         [HttpGet]
         public ActionResult<IEnumerable<Category>> Get()
         {
-            try
-            {
-                var categories = _context.Categories.AsNoTracking().ToList();
-
-                if (categories == null)
-                {
-                    return NotFound("Categories not found.");
-                }
-                return categories;
-            }
-            catch (Exception)
-            {
-                return StatusCode(StatusCodes.Status500InternalServerError, "A problem occurred while processing your request.");
-            }
-        }
-
-        [HttpGet("products")]
-        public ActionResult<IEnumerable<Category>> GetCategoriesWithProducts()
-        {
-            try
-            {
-                var categoriesWithProducts = _context.Categories.AsNoTracking().Include(p => p.Products).ToList();
-
-                if (categoriesWithProducts == null)
-                {
-                    return NotFound("Categories with products not found.");
-                }
-                return categoriesWithProducts;
-            }
-            catch (Exception)
-            {
-                return StatusCode(StatusCodes.Status500InternalServerError, "A problem occurred while processing your request.");
-            }
+            var categories = _repository.GetCategories();
+            return Ok(categories);
         }
 
         [HttpGet("{id:int}", Name = "ObterCategoria")]
         public ActionResult<Category> Get(int id)
         {
-            try
-            {
-                var categoria = _context.Categories.AsNoTracking().FirstOrDefault(p => p.Id == id);
+            var categoria = _repository.GetCategory(id);
+            return Ok(categoria);
 
-                if (categoria == null)
-                {
-                    return NotFound("Category not found.");
-                }
-                return Ok(categoria);
-            }
-            catch (Exception)
-            {
-                return StatusCode(StatusCodes.Status500InternalServerError, "A problem occurred while processing your request.");
-            }
         }
 
         [HttpPost]
         public ActionResult Post(Category category)
         {
-            try
-            {
-                if (category == null)
-                {
-                    return BadRequest();
-                }
-
-                _context.Categories.Add(category);
-                _context.SaveChanges();
-                return new CreatedAtRouteResult("ObterCategoria", new { id = category.Id }, category);
-            }
-            catch (Exception)
-            {
-                return StatusCode(StatusCodes.Status500InternalServerError, "A problem occurred while processing your request.");
-            }
+            var createdCategory = _repository.Create(category);
+            return new CreatedAtRouteResult("ObterCategoria", new { id = category.Id }, createdCategory);
         }
 
         [HttpPut("{id:int}")]
         public ActionResult Put(int id, Category category)
         {
-            try
+            if (id != category.Id)
             {
-                if (id != category.Id)
-                {
-                    return BadRequest();
-                }
-                _context.Entry(category).State = EntityState.Modified;
-                _context.SaveChanges();
-                return Ok(category);
+                return BadRequest("Invalid data.");
             }
-            catch (Exception)
-            {
-                return StatusCode(StatusCodes.Status500InternalServerError, "A problem occurred while processing your request.");
-            }
+
+            _repository.Update(category);
+            return Ok(category);
         }
 
         [HttpDelete("{id:int}")]
         public ActionResult Delete(int id)
         {
-            try
-            {
-                var categoria = _context.Categories.FirstOrDefault(p => p.Id == id);
-
-                if (categoria == null)
-                {
-                    return NotFound("Category not found.");
-                }
-                _context.Categories.Remove(categoria);
-                _context.SaveChanges();
-                return Ok(categoria);
-            }
-            catch (Exception)
-            {
-                return StatusCode(StatusCodes.Status500InternalServerError, "A problem occurred while processing your request.");
-            }
+            var categoria = _repository.GetCategory(id);
+            return Ok(categoria);
         }
     }
 }

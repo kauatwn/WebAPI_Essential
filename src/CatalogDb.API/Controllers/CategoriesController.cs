@@ -1,8 +1,6 @@
-﻿using CatalogDb.API.Context;
-using CatalogDb.API.Entities;
+﻿using CatalogDb.API.Entities;
 using CatalogDb.API.Repositories;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
 
 namespace CatalogDb.API.Controllers
 {
@@ -49,8 +47,9 @@ namespace CatalogDb.API.Controllers
         [HttpDelete("{id:int}")]
         public ActionResult Delete(int id)
         {
-            var categoria = _repository.GetCategory(id);
-            return Ok(categoria);
+            _repository.GetCategory(id);
+            var deletedCategory = _repository.Delete(id);
+            return Ok(deletedCategory);
         }
     }
 }

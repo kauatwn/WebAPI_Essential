@@ -22,7 +22,9 @@ namespace CatalogDb.API.Entities
         [Required]
         [StringLength(300)]
         public string? ImageUrl { get; set; }
+
         public float Stock { get; set; }
         public DateTime RegistrationDate { get; set; }
+        public int CategoryId { get; set; }
     }
 }

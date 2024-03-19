@@ -6,21 +6,21 @@ namespace CatalogDb.API.Controllers
 {
     [Route("[controller]")]
     [ApiController]
-    public class CategoriesController(ICategoryRepository repository) : ControllerBase
+    public class CategoriesController(IUnityOfWork unityOfWork) : ControllerBase
     {
-        private readonly ICategoryRepository _repository = repository;
+        private readonly IUnityOfWork _unityOfWork = unityOfWork;
 
         [HttpGet]
         public ActionResult<IEnumerable<Category>> Get()
         {
-            var categories = _repository.GetCategories();
+            var categories = _unityOfWork.CategoryRepository.GetCategories();
             return Ok(categories);
         }
 
         [HttpGet("{id:int}", Name = "ObterCategoria")]
         public ActionResult<Category> Get(int id)
         {
-            var categoria = _repository.GetCategory(id);
+            var categoria = _unityOfWork.CategoryRepository.GetCategory(id);
             return Ok(categoria);
 
         }
@@ -28,7 +28,7 @@ namespace CatalogDb.API.Controllers
         [HttpPost]
         public ActionResult Post(Category category)
         {
-            var createdCategory = _repository.Create(category);
+            var createdCategory = _unityOfWork.CategoryRepository.Create(category);
             return new CreatedAtRouteResult("ObterCategoria", new { id = category.Id }, createdCategory);
         }
 
@@ -40,15 +40,15 @@ namespace CatalogDb.API.Controllers
                 return BadRequest("Invalid data.");
             }
 
-            _repository.Update(category);
+            _unityOfWork.CategoryRepository.Update(category);
             return Ok(category);
         }
 
         [HttpDelete("{id:int}")]
         public ActionResult Delete(int id)
         {
-            _repository.GetCategory(id);
-            var deletedCategory = _repository.Delete(id);
+            _unityOfWork.CategoryRepository.GetCategory(id);
+            var deletedCategory = _unityOfWork.CategoryRepository.Delete(id);
             return Ok(deletedCategory);
         }
     }

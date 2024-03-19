@@ -37,7 +37,6 @@ namespace CatalogDb.API.Repositories
             }
 
             _context.Categories.Add(category);
-            _context.SaveChanges();
             return category;
         }
 
@@ -49,7 +48,6 @@ namespace CatalogDb.API.Repositories
             }
 
             _context.Entry(category).State = EntityState.Modified;
-            _context.SaveChanges();
             return category;
         }
 
@@ -63,7 +61,6 @@ namespace CatalogDb.API.Repositories
             }
 
             _context.Categories.Remove(category);
-            _context.SaveChanges();
             return category;
         }
     }

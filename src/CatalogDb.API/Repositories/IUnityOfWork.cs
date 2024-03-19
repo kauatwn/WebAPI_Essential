@@ -1,6 +1,4 @@
-﻿using CatalogDb.API.Context;
-
-namespace CatalogDb.API.Repositories
+﻿namespace CatalogDb.API.Repositories
 {
     public interface IUnityOfWork
     {

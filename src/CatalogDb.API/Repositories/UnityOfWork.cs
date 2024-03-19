@@ -7,7 +7,7 @@ namespace CatalogDb.API.Repositories
         private IProductRepository? _productRepository;
         private ICategoryRepository? _categoryRepository;
 
-        public AppDbContext Context = context;
+        private readonly AppDbContext Context = context;
 
         public IProductRepository ProductRepository
         {

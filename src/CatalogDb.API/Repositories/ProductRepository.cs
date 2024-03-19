@@ -38,7 +38,6 @@ namespace CatalogDb.API.Repositories
             }
 
             _context.Products.Add(product);
-            _context.SaveChanges();
             return product;
         }
         
@@ -50,7 +49,6 @@ namespace CatalogDb.API.Repositories
             }
 
             _context.Entry(product).State = EntityState.Modified;
-            _context.SaveChanges();
             return product;
         }
 
@@ -64,7 +62,6 @@ namespace CatalogDb.API.Repositories
             }
 
             _context.Products.Remove(product);
-            _context.SaveChanges();
             return product;
         }
     }

@@ -6,28 +6,29 @@ namespace CatalogDb.API.Controllers
 {
     [Route("[controller]")]
     [ApiController]
-    public class ProductsController(IProductRepository repository) : ControllerBase
+    public class ProductsController(IUnityOfWork unityOfWork) : ControllerBase
     {
-        private readonly IProductRepository _repository = repository;
+        private readonly IUnityOfWork _unityOfWork = unityOfWork;
 
         [HttpGet]
         public ActionResult<IEnumerable<Product>> Get()
         {
-            var products = _repository.GetProducts();
+            var products = _unityOfWork.ProductRepository.GetProducts();
             return Ok(products);
         }
 
         [HttpGet("{id:int}", Name = "ObterProduto")]
         public ActionResult<Product> Get(int id)
         {
-            var product = _repository.GetProduct(id);
+            var product = _unityOfWork.ProductRepository.GetProduct(id);
             return Ok(product);
         }
 
         [HttpPost]
         public ActionResult Post(Product product)
         {
-            var createdProduct = _repository.Create(product);
+            var createdProduct = _unityOfWork.ProductRepository.Create(product);
+            _unityOfWork.Commit();
             return new CreatedAtRouteResult("ObterProduto", new {id = product.Id}, createdProduct);
         }
 
@@ -38,15 +39,17 @@ namespace CatalogDb.API.Controllers
             {
                 return BadRequest("Ivalid data.");
             }
-            _repository.Update(product);
+            _unityOfWork.ProductRepository.Update(product);
+            _unityOfWork.Commit();
             return Ok(product);
         }
 
         [HttpDelete("{id:int}")]
         public ActionResult Delete(int id)
         {
-            _repository.GetProduct(id);
-            var deletedProduct = _repository.Delete(id);
+            _unityOfWork.ProductRepository.GetProduct(id);
+            var deletedProduct = _unityOfWork.ProductRepository.Delete(id);
+            _unityOfWork.Commit();
             return Ok(deletedProduct);
         }
     }

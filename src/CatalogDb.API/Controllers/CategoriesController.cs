@@ -29,6 +29,7 @@ namespace CatalogDb.API.Controllers
         public ActionResult Post(Category category)
         {
             var createdCategory = _unityOfWork.CategoryRepository.Create(category);
+            _unityOfWork.Commit();
             return new CreatedAtRouteResult("ObterCategoria", new { id = category.Id }, createdCategory);
         }
 
@@ -41,6 +42,7 @@ namespace CatalogDb.API.Controllers
             }
 
             _unityOfWork.CategoryRepository.Update(category);
+            _unityOfWork.Commit();
             return Ok(category);
         }
 
@@ -49,6 +51,7 @@ namespace CatalogDb.API.Controllers
         {
             _unityOfWork.CategoryRepository.GetCategory(id);
             var deletedCategory = _unityOfWork.CategoryRepository.Delete(id);
+            _unityOfWork.Commit();
             return Ok(deletedCategory);
         }
     }

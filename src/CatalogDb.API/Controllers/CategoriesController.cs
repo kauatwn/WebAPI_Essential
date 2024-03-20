@@ -6,21 +6,21 @@ namespace CatalogDb.API.Controllers
 {
     [Route("[controller]")]
     [ApiController]
-    public class CategoriesController(IUnityOfWork unityOfWork) : ControllerBase
+    public class CategoriesController(IUnitOfWork unitOfWork) : ControllerBase
     {
-        private readonly IUnityOfWork _unityOfWork = unityOfWork;
+        private readonly IUnitOfWork _unitOfWork = unitOfWork;
 
         [HttpGet]
         public ActionResult<IEnumerable<Category>> Get()
         {
-            var categories = _unityOfWork.CategoryRepository.GetCategories();
+            var categories = _unitOfWork.CategoryRepository.GetCategories();
             return Ok(categories);
         }
 
         [HttpGet("{id:int}", Name = "ObterCategoria")]
         public ActionResult<Category> Get(int id)
         {
-            var categoria = _unityOfWork.CategoryRepository.GetCategory(id);
+            var categoria = _unitOfWork.CategoryRepository.GetCategory(id);
             return Ok(categoria);
 
         }
@@ -28,8 +28,8 @@ namespace CatalogDb.API.Controllers
         [HttpPost]
         public ActionResult Post(Category category)
         {
-            var createdCategory = _unityOfWork.CategoryRepository.Create(category);
-            _unityOfWork.Commit();
+            var createdCategory = _unitOfWork.CategoryRepository.Create(category);
+            _unitOfWork.Commit();
             return new CreatedAtRouteResult("ObterCategoria", new { id = category.Id }, createdCategory);
         }
 
@@ -41,17 +41,17 @@ namespace CatalogDb.API.Controllers
                 return BadRequest("Invalid data.");
             }
 
-            _unityOfWork.CategoryRepository.Update(category);
-            _unityOfWork.Commit();
+            _unitOfWork.CategoryRepository.Update(category);
+            _unitOfWork.Commit();
             return Ok(category);
         }
 
         [HttpDelete("{id:int}")]
         public ActionResult Delete(int id)
         {
-            _unityOfWork.CategoryRepository.GetCategory(id);
-            var deletedCategory = _unityOfWork.CategoryRepository.Delete(id);
-            _unityOfWork.Commit();
+            _unitOfWork.CategoryRepository.GetCategory(id);
+            var deletedCategory = _unitOfWork.CategoryRepository.Delete(id);
+            _unitOfWork.Commit();
             return Ok(deletedCategory);
         }
     }

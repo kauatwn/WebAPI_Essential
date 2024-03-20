@@ -1,6 +1,6 @@
 ﻿namespace CatalogDb.API.Repositories
 {
-    public interface IUnityOfWork
+    public interface IUnitOfWork
     {
         public IProductRepository ProductRepository { get; }
         public ICategoryRepository CategoryRepository { get; }

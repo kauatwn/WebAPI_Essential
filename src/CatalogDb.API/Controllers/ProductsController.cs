@@ -1,4 +1,6 @@
-﻿using CatalogDb.API.Entities;
+﻿using AutoMapper;
+using CatalogDb.API.DTOs;
+using CatalogDb.API.Entities;
 using CatalogDb.API.Repositories;
 using Microsoft.AspNetCore.Mvc;
 
@@ -6,15 +8,17 @@ namespace CatalogDb.API.Controllers
 {
     [Route("[controller]")]
     [ApiController]
-    public class ProductsController(IUnitOfWork unitOfWork) : ControllerBase
+    public class ProductsController(IUnitOfWork unitOfWork, IMapper mapper) : ControllerBase
     {
         private readonly IUnitOfWork _unitOfWork = unitOfWork;
+        private readonly IMapper _mapper = mapper;
 
         [HttpGet]
-        public ActionResult<IEnumerable<Product>> Get()
+        public ActionResult<IEnumerable<ProductDTO>> Get()
         {
             var products = _unitOfWork.ProductRepository.GetProducts();
-            return Ok(products);
+            var productsDto = _mapper.Map<IEnumerable<ProductDTO>>(products);
+            return Ok(productsDto);
         }
 
         [HttpGet("{id:int}", Name = "ObterProduto")]
@@ -25,32 +29,38 @@ namespace CatalogDb.API.Controllers
         }
 
         [HttpPost]
-        public ActionResult Post(Product product)
+        public ActionResult<ProductDTO> Post(ProductDTO productDto)
         {
+            var product = _mapper.Map<Product>(productDto);
             var createdProduct = _unitOfWork.ProductRepository.Create(product);
             _unitOfWork.Commit();
-            return new CreatedAtRouteResult("ObterProduto", new { id = product.Id }, createdProduct);
+            var createdProductDto = _mapper.Map<ProductDTO>(createdProduct);
+            return new CreatedAtRouteResult("ObterProduto", new { id = product.Id }, createdProductDto);
         }
 
         [HttpPut("{id:int}")]
-        public ActionResult Put(int id, Product product)
+        public ActionResult<ProductDTO> Put(int id, ProductDTO productDto)
         {
-            if (id != product.Id)
+            if (id != productDto.Id)
             {
                 return BadRequest("Ivalid data.");
             }
-            _unitOfWork.ProductRepository.Update(product);
+
+            var product = _mapper.Map<Product>(productDto);
+            var updatedProduct = _unitOfWork.ProductRepository.Update(product);
             _unitOfWork.Commit();
-            return Ok(product);
+            var updatedProductDto = _mapper.Map<ProductDTO>(updatedProduct);
+            return Ok(updatedProductDto);
         }
 
         [HttpDelete("{id:int}")]
-        public ActionResult Delete(int id)
+        public ActionResult<ProductDTO> Delete(int id)
         {
             _unitOfWork.ProductRepository.GetProduct(id);
             var deletedProduct = _unitOfWork.ProductRepository.Delete(id);
             _unitOfWork.Commit();
-            return Ok(deletedProduct);
+            var deletedProductDto = _mapper.Map<ProductDTO>(deletedProduct);
+            return Ok(deletedProductDto);
         }
     }
 }

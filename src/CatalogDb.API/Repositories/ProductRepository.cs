@@ -11,10 +11,9 @@ namespace CatalogDb.API.Repositories
         public IEnumerable<Product> GetProducts()
         {
             var products = _context.Products.AsNoTracking().ToList();
-         
-            if (products == null)
+            if (products.Count == 0)
             {
-                throw new ArgumentNullException(nameof(products));
+                throw new Exception("List of products not found.");
             }
             return products;
         }

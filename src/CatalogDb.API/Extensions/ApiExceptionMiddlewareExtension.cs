@@ -4,7 +4,7 @@ using System.Net;
 
 namespace CatalogDb.API.Extensions
 {
-    public static class ApiExceptionMiddlewareExtensions
+    public static class ApiExceptionMiddlewareExtension
     {
         public static void ConfigureExceptionHandler(this IApplicationBuilder app)
         {

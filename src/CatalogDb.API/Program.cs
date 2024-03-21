@@ -19,6 +19,7 @@ builder.Services.AddScoped<ICategoryRepository, CategoryRepository>();
 builder.Services.AddScoped<IProductRepository, ProductRepository>();
 builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
 builder.Services.AddAutoMapper(typeof(ProductDTOMappingProfile));
+builder.Services.AddAutoMapper(typeof(CategoryDTOMappingProfile));
 
 var app = builder.Build();
 

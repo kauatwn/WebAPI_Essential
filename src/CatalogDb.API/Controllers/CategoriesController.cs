@@ -1,6 +1,6 @@
-﻿using CatalogDb.API.DTOs;
+﻿using AutoMapper;
+using CatalogDb.API.DTOs;
 using CatalogDb.API.Entities;
-using CatalogDb.API.Extensions;
 using CatalogDb.API.Repositories;
 using Microsoft.AspNetCore.Mvc;
 
@@ -8,15 +8,16 @@ namespace CatalogDb.API.Controllers
 {
     [Route("[controller]")]
     [ApiController]
-    public class CategoriesController(IUnitOfWork unitOfWork) : ControllerBase
+    public class CategoriesController(IUnitOfWork unitOfWork, IMapper mapper) : ControllerBase
     {
         private readonly IUnitOfWork _unitOfWork = unitOfWork;
+        private readonly IMapper _mapper = mapper;
 
         [HttpGet]
         public ActionResult<IEnumerable<CategoryDTO>> Get()
         {
             var categories = _unitOfWork.CategoryRepository.GetCategories();
-            var categoriesDto = categories.ToCategoriesDTOList();
+            var categoriesDto = _mapper.Map<IEnumerable<CategoryDTO>>(categories);
             return Ok(categoriesDto);
         }
 
@@ -24,17 +25,17 @@ namespace CatalogDb.API.Controllers
         public ActionResult<CategoryDTO> Get(int id)
         {
             var category = _unitOfWork.CategoryRepository.GetCategory(id);
-            var categoryDto = category.ToCategoryDTO();
+            var categoryDto = _mapper.Map<CategoryDTO>(category);
             return Ok(categoryDto);
         }
 
         [HttpPost]
         public ActionResult<CategoryDTO> Post(CategoryDTO categoryDto)
         {
-            var category = categoryDto.ToCategory();
+            var category = _mapper.Map<Category>(categoryDto);
             var createdCategory = _unitOfWork.CategoryRepository.Create(category);
             _unitOfWork.Commit();
-            var createdCategoryDto = createdCategory.ToCategoryDTO();
+            var createdCategoryDto = _mapper.Map<CategoryDTO>(createdCategory);
             return new CreatedAtRouteResult("ObterCategoria", new { id = category.Id }, createdCategoryDto);
         }
 
@@ -46,10 +47,10 @@ namespace CatalogDb.API.Controllers
                 return BadRequest("Invalid data.");
             }
 
-            var category = categoryDto.ToCategory();
+            var category = _mapper.Map<Category>(id);
             var updatedCategory = _unitOfWork.CategoryRepository.Update(category);
             _unitOfWork.Commit();
-            var updatedCategoryDto = updatedCategory.ToCategoryDTO();
+            var updatedCategoryDto = _mapper.Map<CategoryDTO>(updatedCategory);
             return Ok(updatedCategoryDto);
         }
 
@@ -59,7 +60,7 @@ namespace CatalogDb.API.Controllers
             _unitOfWork.CategoryRepository.GetCategory(id);
             var deletedCategory = _unitOfWork.CategoryRepository.Delete(id);
             _unitOfWork.Commit();
-            var deletedCategoryDto = deletedCategory.ToCategoryDTO();
+            var deletedCategoryDto = _mapper.Map<CategoryDTO>(deletedCategory);
             return Ok(deletedCategoryDto);
         }
     }

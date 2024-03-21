@@ -9,7 +9,8 @@ namespace CatalogDb.API.Entities
         public string? Message { get; set; }
 
         [JsonIgnore]
-        public string?Trace { get; set; }
+        public string? Trace { get; set; }
+
         public override string ToString()
         {
             return JsonSerializer.Serialize(this);

@@ -8,13 +8,13 @@ namespace CatalogDb.API.Entities
 
         [Required]
         [StringLength(80)]
-        public string? Name { get; set; }
+        public string Name { get; set; } = string.Empty;
 
         [Required]
         [StringLength(300)]
-        public string? ImageUrl { get; set; }
+        public string ImageUrl { get; set; } = string.Empty;
 
-        public List<Product>? Products { get; set; }
+        public List<Product> Products { get; set; }
 
         public Category()
         {

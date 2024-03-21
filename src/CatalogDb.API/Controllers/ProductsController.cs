@@ -21,11 +21,12 @@ namespace CatalogDb.API.Controllers
             return Ok(productsDto);
         }
 
-        [HttpGet("{id:int}", Name = "ObterProduto")]
-        public ActionResult<Product> Get(int id)
+        [HttpGet("{id:int}", Name = "ObterProduto")]    
+        public ActionResult<ProductDTO> Get(int id)
         {
             var product = _unitOfWork.ProductRepository.GetProduct(id);
-            return Ok(product);
+            var productDto = _mapper.Map<ProductDTO>(product);
+            return Ok(productDto);
         }
 
         [HttpPost]

@@ -12,9 +12,9 @@ namespace CatalogDb.API.Repositories
         {
             var categories = _context.Categories.AsNoTracking().ToList();
 
-            if (categories == null)
+            if (categories.Count == 0)
             {
-                throw new ArgumentNullException(nameof(categories));
+                throw new Exception("List of categories not found.");
             }
             return categories;
         }

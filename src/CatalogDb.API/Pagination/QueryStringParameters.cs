@@ -1,10 +1,10 @@
 ﻿namespace CatalogDb.API.Pagination
 {
-    public class ProductQueryParams
+    public abstract class QueryStringParameters
     {
         private const int _maxPageSize = 10;
-        public int PageNumber { get; set; }
-        private int _pageSize;
+        public int PageNumber { get; set; } = 1;
+        private int _pageSize = _maxPageSize;
 
         public int PageSize
         {

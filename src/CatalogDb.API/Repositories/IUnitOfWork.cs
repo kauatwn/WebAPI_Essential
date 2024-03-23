@@ -1,9 +1,10 @@
 ﻿namespace CatalogDb.API.Repositories
 {
-    public interface IUnitOfWork
+    public interface IUnitOfWork<T>
     {
-        public IProductRepository ProductRepository { get; }
-        public ICategoryRepository CategoryRepository { get; }
-        public void Commit();
+        IRepository<T> Repository { get; }
+        ICategoryRepository CategoryRepository { get; }
+        IProductRepository ProductRepository { get; }
+        void Commit();
     }
 }

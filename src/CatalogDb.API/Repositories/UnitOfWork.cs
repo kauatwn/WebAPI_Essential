@@ -2,21 +2,21 @@
 
 namespace CatalogDb.API.Repositories
 {
-    public class UnitOfWork(AppDbContext context) : IUnitOfWork
+    public class UnitOfWork<T>(AppDbContext context) : IUnitOfWork<T> where T : class
     {
-        private IProductRepository? _productRepository;
+        private IRepository<T>? _repository;
         private ICategoryRepository? _categoryRepository;
-
+        private IProductRepository? _productRepository;
         private readonly AppDbContext _context = context;
 
-        public IProductRepository ProductRepository
+        public IRepository<T> Repository
         {
             get
             {
                 // Null coalescing.
-                // Se _productRepository for null, recebe ProductRepository(Context).
-                // Se não, recebe _productRepository.
-                return _productRepository ??= new ProductRepository(_context);
+                // Se _repository for null, recebe Repository<T>(_context).
+                // Se não, recebe _repository.
+                return _repository ??= new Repository<T>(_context);
             }
         }
 
@@ -25,6 +25,14 @@ namespace CatalogDb.API.Repositories
             get
             {
                 return _categoryRepository ??= new CategoryRepository(_context);
+            }
+        }
+
+        public IProductRepository ProductRepository
+        {
+            get
+            {
+                return _productRepository ??= new ProductRepository(_context);
             }
         }
 

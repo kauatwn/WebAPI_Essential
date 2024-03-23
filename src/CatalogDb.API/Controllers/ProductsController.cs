@@ -10,25 +10,15 @@ namespace CatalogDb.API.Controllers
 {
     [Route("[controller]")]
     [ApiController]
-    public class ProductsController(IUnitOfWork unitOfWork, IMapper mapper) : ControllerBase
+    public class ProductsController(IUnitOfWork<Product> unitOfWork, IMapper mapper) : ControllerBase
     {
-        private readonly IUnitOfWork _unitOfWork = unitOfWork;
+        private readonly IUnitOfWork<Product> _unitOfWork = unitOfWork;
         private readonly IMapper _mapper = mapper;
 
         [HttpGet]
-        public ActionResult<IEnumerable<ProductDTO>> Get([FromQuery] ProductQueryParams productQuery)
+        public ActionResult<IEnumerable<ProductDTO>> Get([FromQuery] ProductQueryParameters productQuery)
         {
-            if (productQuery.PageNumber == 0)
-            {
-                productQuery.PageNumber = 1;
-            }
-
-            if (productQuery.PageSize == 0)
-            {
-                productQuery.PageSize = 10;
-            }
-
-            var products = _unitOfWork.ProductRepository.GetProducts(productQuery);
+            var products = _unitOfWork.ProductRepository.GetPagedProducts(productQuery);
             var metadata = new
             {
                 products.TotalCount,
@@ -47,10 +37,14 @@ namespace CatalogDb.API.Controllers
             return Ok(productsDto);
         }
 
-        [HttpGet("{id:int}", Name = "ObterProduto")]    
+        [HttpGet("{id:int}", Name = "ObterProduto")]
         public ActionResult<ProductDTO> Get(int id)
         {
-            var product = _unitOfWork.ProductRepository.GetProduct(id);
+            var product = _unitOfWork.Repository.Get(p => p.Id == id);
+            if (product == null)
+            {
+                return NotFound();
+            }
             var productDto = _mapper.Map<ProductDTO>(product);
             return Ok(productDto);
         }
@@ -58,8 +52,12 @@ namespace CatalogDb.API.Controllers
         [HttpPost]
         public ActionResult<ProductDTO> Post(ProductDTO productDto)
         {
+            if (productDto == null)
+            {
+                return BadRequest();
+            }
             var product = _mapper.Map<Product>(productDto);
-            var createdProduct = _unitOfWork.ProductRepository.Create(product);
+            var createdProduct = _unitOfWork.Repository.Create(product);
             _unitOfWork.Commit();
             var createdProductDto = _mapper.Map<ProductDTO>(createdProduct);
             return new CreatedAtRouteResult("ObterProduto", new { id = product.Id }, createdProductDto);
@@ -68,13 +66,12 @@ namespace CatalogDb.API.Controllers
         [HttpPut("{id:int}")]
         public ActionResult<ProductDTO> Put(int id, ProductDTO productDto)
         {
-            if (id != productDto.Id)
+            if (id != productDto.Id || productDto == null)
             {
-                return BadRequest("Ivalid data.");
+                return BadRequest();
             }
-
             var product = _mapper.Map<Product>(productDto);
-            var updatedProduct = _unitOfWork.ProductRepository.Update(product);
+            var updatedProduct = _unitOfWork.Repository.Update(product);
             _unitOfWork.Commit();
             var updatedProductDto = _mapper.Map<ProductDTO>(updatedProduct);
             return Ok(updatedProductDto);
@@ -83,8 +80,12 @@ namespace CatalogDb.API.Controllers
         [HttpDelete("{id:int}")]
         public ActionResult<ProductDTO> Delete(int id)
         {
-            _unitOfWork.ProductRepository.GetProduct(id);
-            var deletedProduct = _unitOfWork.ProductRepository.Delete(id);
+            var product = _unitOfWork.Repository.Get(p => p.Id == id);
+            if (product == null)
+            {
+                return NotFound();
+            }
+            var deletedProduct = _unitOfWork.Repository.Delete(product);
             _unitOfWork.Commit();
             var deletedProductDto = _mapper.Map<ProductDTO>(deletedProduct);
             return Ok(deletedProductDto);

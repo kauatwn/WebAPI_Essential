@@ -1,22 +1,38 @@
 ﻿using AutoMapper;
 using CatalogDb.API.DTOs;
 using CatalogDb.API.Entities;
+using CatalogDb.API.Pagination;
 using CatalogDb.API.Repositories;
 using Microsoft.AspNetCore.Mvc;
+using Newtonsoft.Json;
 
 namespace CatalogDb.API.Controllers
 {
     [Route("[controller]")]
     [ApiController]
-    public class CategoriesController(IUnitOfWork unitOfWork, IMapper mapper) : ControllerBase
+    public class CategoriesController(IUnitOfWork<Category> unitOfWork, IMapper mapper) : ControllerBase
     {
-        private readonly IUnitOfWork _unitOfWork = unitOfWork;
+        private readonly IUnitOfWork<Category> _unitOfWork = unitOfWork;
         private readonly IMapper _mapper = mapper;
 
         [HttpGet]
-        public ActionResult<IEnumerable<CategoryDTO>> Get()
+        public ActionResult<IEnumerable<CategoryDTO>> Get([FromQuery] CategoryQueryParameters categoryQuery)
         {
-            var categories = _unitOfWork.CategoryRepository.GetCategories();
+            var categories = _unitOfWork.CategoryRepository.GetPagedCategories(categoryQuery);
+            var metadata = new
+            {
+                categories.TotalCount,
+                categories.PageSize,
+                categories.CurrentPage,
+                categories.TotalPages,
+                categories.HasPreviousPage,
+                categories.HasNextPage,
+            };
+            Response.Headers.Append("X-Pagination", JsonConvert.SerializeObject(metadata));
+            if (categories == null)
+            {
+                return NotFound();
+            }
             var categoriesDto = _mapper.Map<IEnumerable<CategoryDTO>>(categories);
             return Ok(categoriesDto);
         }
@@ -24,7 +40,11 @@ namespace CatalogDb.API.Controllers
         [HttpGet("{id:int}", Name = "ObterCategoria")]
         public ActionResult<CategoryDTO> Get(int id)
         {
-            var category = _unitOfWork.CategoryRepository.GetCategory(id);
+            var category = _unitOfWork.Repository.Get(c => c.Id == id);
+            if (category == null)
+            {
+                return NotFound();
+            }
             var categoryDto = _mapper.Map<CategoryDTO>(category);
             return Ok(categoryDto);
         }
@@ -32,8 +52,12 @@ namespace CatalogDb.API.Controllers
         [HttpPost]
         public ActionResult<CategoryDTO> Post(CategoryDTO categoryDto)
         {
+            if (categoryDto == null)
+            {
+                return BadRequest();
+            }
             var category = _mapper.Map<Category>(categoryDto);
-            var createdCategory = _unitOfWork.CategoryRepository.Create(category);
+            var createdCategory = _unitOfWork.Repository.Create(category);
             _unitOfWork.Commit();
             var createdCategoryDto = _mapper.Map<CategoryDTO>(createdCategory);
             return new CreatedAtRouteResult("ObterCategoria", new { id = category.Id }, createdCategoryDto);
@@ -42,13 +66,12 @@ namespace CatalogDb.API.Controllers
         [HttpPut("{id:int}")]
         public ActionResult<CategoryDTO> Put(int id, CategoryDTO categoryDto)
         {
-            if (id != categoryDto.Id)
+            if (id != categoryDto.Id || categoryDto == null)
             {
-                return BadRequest("Invalid data.");
+                return BadRequest();
             }
-
             var category = _mapper.Map<Category>(id);
-            var updatedCategory = _unitOfWork.CategoryRepository.Update(category);
+            var updatedCategory = _unitOfWork.Repository.Update(category);
             _unitOfWork.Commit();
             var updatedCategoryDto = _mapper.Map<CategoryDTO>(updatedCategory);
             return Ok(updatedCategoryDto);
@@ -57,8 +80,12 @@ namespace CatalogDb.API.Controllers
         [HttpDelete("{id:int}")]
         public ActionResult<CategoryDTO> Delete(int id)
         {
-            _unitOfWork.CategoryRepository.GetCategory(id);
-            var deletedCategory = _unitOfWork.CategoryRepository.Delete(id);
+            var category = _unitOfWork.Repository.Get(c => c.Id == id);
+            if (category == null)
+            {
+                return NotFound();
+            }
+            var deletedCategory = _unitOfWork.Repository.Delete(category);
             _unitOfWork.Commit();
             var deletedCategoryDto = _mapper.Map<CategoryDTO>(deletedCategory);
             return Ok(deletedCategoryDto);

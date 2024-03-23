@@ -19,22 +19,14 @@ namespace CatalogDb.API.Controllers
         public ActionResult<IEnumerable<ProductDTO>> Get([FromQuery] ProductQueryParameters productQuery)
         {
             var products = _unitOfWork.ProductRepository.GetPagedProducts(productQuery);
-            var metadata = new
-            {
-                products.TotalCount,
-                products.PageSize,
-                products.CurrentPage,
-                products.TotalPages,
-                products.HasPreviousPage,
-                products.HasNextPage,
-            };
+            return GenerateResponse(products);
+        }
 
-            // Cabeçalho que será enviado ao front contendo informações de paginação.
-            // Número da página atual, tamanho da página, total de itens, etc.
-            Response.Headers.Append("X-Pagination", JsonConvert.SerializeObject(metadata));
-
-            var productsDto = _mapper.Map<IEnumerable<ProductDTO>>(products);
-            return Ok(productsDto);
+        [HttpGet("filtered-by-price")]
+        public ActionResult<IEnumerable<ProductDTO>> GetProductsFilteredByPrice([FromQuery] ProductPriceFilter filter)
+        {
+            var products = _unitOfWork.ProductRepository.GetProductsFilteredByPrice(filter);
+            return GenerateResponse(products);
         }
 
         [HttpGet("{id:int}", Name = "ObterProduto")]
@@ -89,6 +81,26 @@ namespace CatalogDb.API.Controllers
             _unitOfWork.Commit();
             var deletedProductDto = _mapper.Map<ProductDTO>(deletedProduct);
             return Ok(deletedProductDto);
+        }
+
+        private ActionResult<IEnumerable<ProductDTO>> GenerateResponse(PagedList<Product> products)
+        {
+            var metadata = new
+            {
+                products.TotalCount,
+                products.PageSize,
+                products.CurrentPage,
+                products.TotalPages,
+                products.HasPreviousPage,
+                products.HasNextPage,
+            };
+
+            // Cabeçalho que será enviado ao front contendo informações de paginação.
+            // Número da página atual, tamanho da página, total de itens, etc.
+            Response.Headers.Append("X-Pagination", JsonConvert.SerializeObject(metadata));
+
+            var productsDto = _mapper.Map<IEnumerable<ProductDTO>>(products);
+            return Ok(productsDto);
         }
     }
 }

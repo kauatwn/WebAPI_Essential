@@ -3,11 +3,12 @@ using CatalogDb.API.Entities;
 
 namespace CatalogDb.API.DTOs.Mappings
 {
-    public class ProductDTOMappingProfile : Profile
+    public class DTOsMappingProfile : Profile
     {
-        public ProductDTOMappingProfile()
+        public DTOsMappingProfile()
         {
             CreateMap<Product, ProductDTO>().ReverseMap();
+            CreateMap<Category, CategoryDTO>().ReverseMap();
         }
     }
 }

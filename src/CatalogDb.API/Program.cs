@@ -18,8 +18,7 @@ builder.Services.AddDbContext<AppDbContext>(options => options.UseSqlServer(buil
 builder.Services.AddScoped<ICategoryRepository, CategoryRepository>();
 builder.Services.AddScoped<IProductRepository, ProductRepository>();
 builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
-builder.Services.AddAutoMapper(typeof(ProductDTOMappingProfile));
-builder.Services.AddAutoMapper(typeof(CategoryDTOMappingProfile));
+builder.Services.AddAutoMapper(typeof(DTOsMappingProfile));
 
 var app = builder.Build();
 

@@ -1,5 +1,6 @@
 ﻿using CatalogDb.API.Context;
 using CatalogDb.API.Entities;
+using CatalogDb.API.Pagination;
 using Microsoft.EntityFrameworkCore;
 
 namespace CatalogDb.API.Repositories
@@ -8,14 +9,15 @@ namespace CatalogDb.API.Repositories
     {
         private readonly AppDbContext _context = context;
         
-        public IEnumerable<Product> GetProducts()
+        public PagedList<Product> GetProducts(ProductQueryParams productQuery)
         {
-            var products = _context.Products.AsNoTracking().ToList();
-            if (products.Count == 0)
+            var products = _context.Products.AsNoTracking().OrderBy(p => p.Id);
+            var orderedProduct = PagedList<Product>.ToPagedList(products, productQuery.PageNumber, productQuery.PageSize);
+            if (orderedProduct.Count == 0)
             {
                 throw new Exception("List of products not found.");
             }
-            return products;
+            return orderedProduct;
         }
 
         public Product GetProduct(int id)

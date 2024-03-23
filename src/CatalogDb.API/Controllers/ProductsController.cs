@@ -1,8 +1,10 @@
 ﻿using AutoMapper;
 using CatalogDb.API.DTOs;
 using CatalogDb.API.Entities;
+using CatalogDb.API.Pagination;
 using CatalogDb.API.Repositories;
 using Microsoft.AspNetCore.Mvc;
+using Newtonsoft.Json;
 
 namespace CatalogDb.API.Controllers
 {
@@ -14,9 +16,33 @@ namespace CatalogDb.API.Controllers
         private readonly IMapper _mapper = mapper;
 
         [HttpGet]
-        public ActionResult<IEnumerable<ProductDTO>> Get()
+        public ActionResult<IEnumerable<ProductDTO>> Get([FromQuery] ProductQueryParams productQuery)
         {
-            var products = _unitOfWork.ProductRepository.GetProducts();
+            if (productQuery.PageNumber == 0)
+            {
+                productQuery.PageNumber = 1;
+            }
+
+            if (productQuery.PageSize == 0)
+            {
+                productQuery.PageSize = 10;
+            }
+
+            var products = _unitOfWork.ProductRepository.GetProducts(productQuery);
+            var metadata = new
+            {
+                products.TotalCount,
+                products.PageSize,
+                products.CurrentPage,
+                products.TotalPages,
+                products.HasPreviousPage,
+                products.HasNextPage,
+            };
+
+            // Cabeçalho que será enviado ao front contendo informações de paginação.
+            // Número da página atual, tamanho da página, total de itens, etc.
+            Response.Headers.Append("X-Pagination", JsonConvert.SerializeObject(metadata));
+
             var productsDto = _mapper.Map<IEnumerable<ProductDTO>>(products);
             return Ok(productsDto);
         }

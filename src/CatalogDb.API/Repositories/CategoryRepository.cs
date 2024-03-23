@@ -1,67 +1,20 @@
 ﻿using CatalogDb.API.Context;
 using CatalogDb.API.Entities;
-using Microsoft.EntityFrameworkCore;
+using CatalogDb.API.Pagination;
 
 namespace CatalogDb.API.Repositories
 {
-    public class CategoryRepository(AppDbContext context) : ICategoryRepository
+    public class CategoryRepository(AppDbContext context) : Repository<Category>(context), ICategoryRepository
     {
-        private readonly AppDbContext _context = context;
-
-        public IEnumerable<Category> GetCategories()
+        public PagedList<Category> GetPagedCategories(CategoryQueryParameters categoryQuery)
         {
-            var categories = _context.Categories.AsNoTracking().ToList();
-
-            if (categories.Count == 0)
+            var categories = GetAll().OrderBy(p => p.Id).AsQueryable();
+            var pagedCategoryList = PagedList<Category>.ToPagedList(categories, categoryQuery.PageNumber, categoryQuery.PageSize);
+            if (pagedCategoryList.Count == 0)
             {
                 throw new Exception("List of categories not found.");
             }
-            return categories;
-        }
-
-        public Category GetCategory(int id)
-        {
-           var category = _context.Categories.AsNoTracking().FirstOrDefault(c => c.Id == id);
-
-            if (category == null)
-            {
-                throw new ArgumentNullException(nameof(category));
-            }
-            return category;
-        }
-        public Category Create(Category category)
-        {
-            if (category == null)
-            {
-                throw new ArgumentNullException(nameof(category));
-            }
-
-            _context.Categories.Add(category);
-            return category;
-        }
-
-        public Category Update(Category category)
-        {
-            if (category == null)
-            {
-                throw new ArgumentNullException(nameof(category));
-            }
-
-            _context.Entry(category).State = EntityState.Modified;
-            return category;
-        }
-
-        public Category Delete(int id)
-        {
-            var category = _context.Categories.Find(id);
-
-            if (category == null)
-            {
-                throw new ArgumentNullException(nameof(category));
-            }
-
-            _context.Categories.Remove(category);
-            return category;
+            return pagedCategoryList;
         }
     }
 }

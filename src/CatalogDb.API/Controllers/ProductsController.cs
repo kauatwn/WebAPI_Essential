@@ -16,23 +16,23 @@ namespace CatalogDb.API.Controllers
         private readonly IMapper _mapper = mapper;
 
         [HttpGet]
-        public ActionResult<IEnumerable<ProductDTO>> Get([FromQuery] ProductQueryParameters productQuery)
+        public async Task<ActionResult<IEnumerable<ProductDTO>>> Get([FromQuery] ProductQueryParameters productQuery)
         {
-            var products = _unitOfWork.ProductRepository.GetPagedProducts(productQuery);
+            var products = await _unitOfWork.ProductRepository.GetPagedProductsAsync(productQuery);
             return GenerateResponse(products);
         }
 
         [HttpGet("filtered-by-price")]
-        public ActionResult<IEnumerable<ProductDTO>> GetProductsFilteredByPrice([FromQuery] ProductPriceFilter filter)
+        public async Task<ActionResult<IEnumerable<ProductDTO>>> GetProductsFilteredByPrice([FromQuery] ProductPriceFilter filter)
         {
-            var products = _unitOfWork.ProductRepository.GetProductsFilteredByPrice(filter);
+            var products = await _unitOfWork.ProductRepository.GetProductsFilteredByPriceAsync(filter);
             return GenerateResponse(products);
         }
 
         [HttpGet("{id:int}", Name = "ObterProduto")]
-        public ActionResult<ProductDTO> Get(int id)
+        public async Task<ActionResult<ProductDTO>> Get(int id)
         {
-            var product = _unitOfWork.Repository.Get(p => p.Id == id);
+            var product = await _unitOfWork.Repository.GetAsync(p => p.Id == id);
             if (product == null)
             {
                 return NotFound();
@@ -42,7 +42,7 @@ namespace CatalogDb.API.Controllers
         }
 
         [HttpPost]
-        public ActionResult<ProductDTO> Post(ProductDTO productDto)
+        public async Task<ActionResult<ProductDTO>> Post(ProductDTO productDto)
         {
             if (productDto == null)
             {
@@ -50,13 +50,13 @@ namespace CatalogDb.API.Controllers
             }
             var product = _mapper.Map<Product>(productDto);
             var createdProduct = _unitOfWork.Repository.Create(product);
-            _unitOfWork.Commit();
+            await _unitOfWork.CommitAsync();
             var createdProductDto = _mapper.Map<ProductDTO>(createdProduct);
             return new CreatedAtRouteResult("ObterProduto", new { id = product.Id }, createdProductDto);
         }
 
         [HttpPut("{id:int}")]
-        public ActionResult<ProductDTO> Put(int id, ProductDTO productDto)
+        public async Task<ActionResult<ProductDTO>> Put(int id, ProductDTO productDto)
         {
             if (id != productDto.Id || productDto == null)
             {
@@ -64,21 +64,21 @@ namespace CatalogDb.API.Controllers
             }
             var product = _mapper.Map<Product>(productDto);
             var updatedProduct = _unitOfWork.Repository.Update(product);
-            _unitOfWork.Commit();
+            await _unitOfWork.CommitAsync();
             var updatedProductDto = _mapper.Map<ProductDTO>(updatedProduct);
             return Ok(updatedProductDto);
         }
 
         [HttpDelete("{id:int}")]
-        public ActionResult<ProductDTO> Delete(int id)
+        public async Task<ActionResult<ProductDTO>> Delete(int id)
         {
-            var product = _unitOfWork.Repository.Get(p => p.Id == id);
+            var product = await _unitOfWork.Repository.GetAsync(p => p.Id == id);
             if (product == null)
             {
                 return NotFound();
             }
             var deletedProduct = _unitOfWork.Repository.Delete(product);
-            _unitOfWork.Commit();
+            await _unitOfWork.CommitAsync();
             var deletedProductDto = _mapper.Map<ProductDTO>(deletedProduct);
             return Ok(deletedProductDto);
         }

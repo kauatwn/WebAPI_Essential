@@ -19,22 +19,14 @@ namespace CatalogDb.API.Controllers
         public ActionResult<IEnumerable<CategoryDTO>> Get([FromQuery] CategoryQueryParameters categoryQuery)
         {
             var categories = _unitOfWork.CategoryRepository.GetPagedCategories(categoryQuery);
-            var metadata = new
-            {
-                categories.TotalCount,
-                categories.PageSize,
-                categories.CurrentPage,
-                categories.TotalPages,
-                categories.HasPreviousPage,
-                categories.HasNextPage,
-            };
-            Response.Headers.Append("X-Pagination", JsonConvert.SerializeObject(metadata));
-            if (categories == null)
-            {
-                return NotFound();
-            }
-            var categoriesDto = _mapper.Map<IEnumerable<CategoryDTO>>(categories);
-            return Ok(categoriesDto);
+            return GenerateResponse(categories);
+        }
+
+        [HttpGet("filtered-by-name")]
+        public ActionResult<IEnumerable<CategoryDTO>> GetCategoriesFilteredByName([FromQuery] CategoryNameFilter filter)
+        {
+            var categories = _unitOfWork.CategoryRepository.GetCategoriesFilteredByName(filter);
+            return GenerateResponse(categories);
         }
 
         [HttpGet("{id:int}", Name = "ObterCategoria")]
@@ -89,6 +81,22 @@ namespace CatalogDb.API.Controllers
             _unitOfWork.Commit();
             var deletedCategoryDto = _mapper.Map<CategoryDTO>(deletedCategory);
             return Ok(deletedCategoryDto);
+        }
+
+        private ActionResult<IEnumerable<CategoryDTO>> GenerateResponse(PagedList<Category> categories)
+        {
+            var metadata = new
+            {
+                categories.TotalCount,
+                categories.PageSize,
+                categories.CurrentPage,
+                categories.TotalPages,
+                categories.HasPreviousPage,
+                categories.HasNextPage,
+            };
+            Response.Headers.Append("X-Pagination", JsonConvert.SerializeObject(metadata));
+            var categoriesDto = _mapper.Map<IEnumerable<CategoryDTO>>(categories);
+            return Ok(categoriesDto);
         }
     }
 }

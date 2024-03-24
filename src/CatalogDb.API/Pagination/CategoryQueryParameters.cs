@@ -1,6 +1,6 @@
 ﻿namespace CatalogDb.API.Pagination
 {
-    public class CategoryQueryParameters : QueryStringParameters
+    public sealed class CategoryQueryParameters : QueryStringParameters
     {
     }
 }

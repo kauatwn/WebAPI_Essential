@@ -5,6 +5,6 @@
         IRepository<T> Repository { get; }
         ICategoryRepository CategoryRepository { get; }
         IProductRepository ProductRepository { get; }
-        void Commit();
+        Task CommitAsync();
     }
 }

@@ -10,7 +10,7 @@ namespace CatalogDb.API.Repositories
         {
             var categories = await GetAllAsync();
             var orderedCategories = categories.OrderBy(p => p.Id);
-            var pagedCategoryList = PagedList<Category>.ToPagedList(categories, categoryQuery.PageNumber, categoryQuery.PageSize);
+            var pagedCategoryList = await PagedList<Category>.ToPagedList(categories, categoryQuery.PageNumber, categoryQuery.PageSize);
             if (pagedCategoryList.Count == 0)
             {
                 throw new Exception("List of categories not found.");
@@ -25,7 +25,7 @@ namespace CatalogDb.API.Repositories
             {
                 categories = categories.Where(c => c.Name.Contains(filter.Name));
             }
-            var filteredCategories = PagedList<Category>.ToPagedList(categories, filter.PageNumber, filter.PageSize);
+            var filteredCategories = await PagedList<Category>.ToPagedList(categories, filter.PageNumber, filter.PageSize);
             return filteredCategories;
         }
     }

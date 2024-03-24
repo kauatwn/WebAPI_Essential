@@ -10,7 +10,7 @@ namespace CatalogDb.API.Repositories
         {
             var products = await GetAllAsync();
             var orderedProducts = products.OrderBy(p => p.Id);
-            var pagedProducts = PagedList<Product>.ToPagedList(orderedProducts, productQuery.PageNumber, productQuery.PageSize);
+            var pagedProducts = await PagedList<Product>.ToPagedList(orderedProducts, productQuery.PageNumber, productQuery.PageSize);
             if (pagedProducts.Count == 0)
             {
                 throw new Exception("List of products not found.");
@@ -36,7 +36,7 @@ namespace CatalogDb.API.Repositories
                     products = products.Where(p => p.Price == filter.Price.Value).OrderBy(p => p.Price);
                 }
             }
-            var filteredProducts = PagedList<Product>.ToPagedList(products, filter.PageNumber, filter.PageSize);
+            var filteredProducts = await PagedList<Product>.ToPagedList(products, filter.PageNumber, filter.PageSize);
             return filteredProducts;
         }
     }

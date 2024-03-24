@@ -6,9 +6,10 @@ namespace CatalogDb.API.Repositories
 {
     public class CategoryRepository(AppDbContext context) : Repository<Category>(context), ICategoryRepository
     {
-        public PagedList<Category> GetPagedCategories(CategoryQueryParameters categoryQuery)
+        public async Task<PagedList<Category>> GetPagedCategoriesAsync(CategoryQueryParameters categoryQuery)
         {
-            var categories = GetAll().OrderBy(p => p.Id).AsQueryable();
+            var categories = await GetAllAsync();
+            var orderedCategories = categories.OrderBy(p => p.Id);
             var pagedCategoryList = PagedList<Category>.ToPagedList(categories, categoryQuery.PageNumber, categoryQuery.PageSize);
             if (pagedCategoryList.Count == 0)
             {
@@ -17,9 +18,9 @@ namespace CatalogDb.API.Repositories
             return pagedCategoryList;
         }
 
-        public PagedList<Category> GetCategoriesFilteredByName(CategoryNameFilter filter)
+        public async Task<PagedList<Category>> GetCategoriesFilteredByNameAsync(CategoryNameFilter filter)
         {
-            var categories = GetAll();
+            var categories = await GetAllAsync();
             if (!string.IsNullOrEmpty(filter.Name))
             {
                 categories = categories.Where(c => c.Name.Contains(filter.Name));

@@ -6,10 +6,11 @@ namespace CatalogDb.API.Repositories
 {
     public class ProductRepository(AppDbContext context) : Repository<Product>(context), IProductRepository
     {
-        public PagedList<Product> GetPagedProducts(ProductQueryParameters productQuery)
+        public async Task<PagedList<Product>> GetPagedProductsAsync(ProductQueryParameters productQuery)
         {
-            var products = GetAll().OrderBy(p => p.Id);
-            var pagedProducts = PagedList<Product>.ToPagedList(products, productQuery.PageNumber, productQuery.PageSize);
+            var products = await GetAllAsync();
+            var orderedProducts = products.OrderBy(p => p.Id);
+            var pagedProducts = PagedList<Product>.ToPagedList(orderedProducts, productQuery.PageNumber, productQuery.PageSize);
             if (pagedProducts.Count == 0)
             {
                 throw new Exception("List of products not found.");
@@ -17,9 +18,9 @@ namespace CatalogDb.API.Repositories
             return pagedProducts;
         }
 
-        public PagedList<Product> GetProductsFilteredByPrice(ProductPriceFilter filter)
+        public async Task<PagedList<Product>> GetProductsFilteredByPriceAsync(ProductPriceFilter filter)
         {
-            var products = GetAll();
+            var products = await GetAllAsync();
             if (filter.Price.HasValue && !string.IsNullOrEmpty(filter.PriceCriterion))
             {
                 if (filter.PriceCriterion.Equals("greater", StringComparison.OrdinalIgnoreCase))

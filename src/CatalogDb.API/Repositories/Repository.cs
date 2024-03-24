@@ -8,14 +8,14 @@ namespace CatalogDb.API.Repositories
     {
         protected readonly AppDbContext _context = context;
 
-        public IQueryable<T> GetAll()
+        public async Task<IQueryable<T>> GetAllAsync()
         {
-            return _context.Set<T>().AsNoTracking();
+            return await Task.FromResult(_context.Set<T>().AsNoTracking());
         }
 
-        public T? Get(Expression<Func<T, bool>> predicate)
+        public async Task<T?> GetAsync(Expression<Func<T, bool>> predicate)
         {
-            return _context.Set<T>().AsNoTracking().FirstOrDefault(predicate);
+            return await _context.Set<T>().AsNoTracking().FirstOrDefaultAsync(predicate);
         }
 
         public T Create(T entity)

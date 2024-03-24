@@ -6,5 +6,6 @@ namespace CatalogDb.API.Repositories
     public interface ICategoryRepository
     {
         public PagedList<Category> GetPagedCategories(CategoryQueryParameters categoryQueryParameters);
+        public PagedList<Category> GetCategoriesFilteredByName(CategoryNameFilter categoryNameFilter);
     }
 }

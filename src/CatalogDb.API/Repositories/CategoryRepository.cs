@@ -16,5 +16,16 @@ namespace CatalogDb.API.Repositories
             }
             return pagedCategoryList;
         }
+
+        public PagedList<Category> GetCategoriesFilteredByName(CategoryNameFilter filter)
+        {
+            var categories = GetAll();
+            if (!string.IsNullOrEmpty(filter.Name))
+            {
+                categories = categories.Where(c => c.Name.Contains(filter.Name));
+            }
+            var filteredCategories = PagedList<Category>.ToPagedList(categories, filter.PageNumber, filter.PageSize);
+            return filteredCategories;
+        }
     }
 }

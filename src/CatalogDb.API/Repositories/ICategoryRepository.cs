@@ -3,9 +3,9 @@ using CatalogDb.API.Pagination;
 
 namespace CatalogDb.API.Repositories
 {
-    public interface ICategoryRepository
+    public interface ICategoryRepository : IRepository<Category>
     {
-        public PagedList<Category> GetPagedCategories(CategoryQueryParameters categoryQueryParameters);
-        public PagedList<Category> GetCategoriesFilteredByName(CategoryNameFilter categoryNameFilter);
+        public Task<PagedList<Category>> GetPagedCategoriesAsync(CategoryQueryParameters categoryQueryParameters);
+        public Task<PagedList<Category>> GetCategoriesFilteredByNameAsync(CategoryNameFilter categoryNameFilter);
     }
 }

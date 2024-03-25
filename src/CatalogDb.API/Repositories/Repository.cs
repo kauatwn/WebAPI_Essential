@@ -8,9 +8,9 @@ namespace CatalogDb.API.Repositories
     {
         protected readonly AppDbContext _context = context;
 
-        public async Task<IQueryable<T>> GetAllAsync()
+        public IQueryable<T> GetAll()
         {
-            return await Task.FromResult(_context.Set<T>().AsNoTracking());
+            return _context.Set<T>().AsNoTracking();
         }
 
         public async Task<T?> GetAsync(Expression<Func<T, bool>> predicate)

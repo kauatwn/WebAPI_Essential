@@ -1,6 +1,7 @@
 ﻿using CatalogDb.API.DTOs;
 using CatalogDb.API.Entities;
 using CatalogDb.API.Services;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using System.IdentityModel.Tokens.Jwt;
@@ -112,11 +113,27 @@ namespace CatalogDb.API.Controllers
             user.RefreshToken = newRefreshToken;
             await _userManager.UpdateAsync(user);
 
-            return new ObjectResult(new
+            return Ok(new
             {
                 accessToken = new JwtSecurityTokenHandler().WriteToken(newAccessToken),
                 refreshToken = newRefreshToken,
             });
+        }
+
+        [Authorize]
+        [HttpPost]
+        [Route("revoke/{userName}")]
+        public async Task<ActionResult> Revoke(string userName)
+        {
+            var user = await _userManager.FindByNameAsync(userName);
+            if (user == null)
+            {
+                return BadRequest("Ivalid user name!");
+            }
+
+            user.RefreshToken = null;
+            await _userManager.UpdateAsync(user);
+            return NoContent();
         }
     }
 }

@@ -55,5 +55,30 @@ namespace CatalogDb.API.Controllers
             }
             return Unauthorized();
         }
+
+        [HttpPost]
+        [Route("register")]
+        public async Task<IActionResult> Register(RegisterDTO registerDTO)
+        {
+            var userExists = await _userManager.FindByNameAsync(registerDTO.UserName);
+            if (userExists != null)
+            {
+                return StatusCode(StatusCodes.Status500InternalServerError, new ResponseDTO("Error", "User already exists!"));
+            }
+
+            var user = new UserApplication()
+            {
+                Email = registerDTO.Email,
+                SecurityStamp = Guid.NewGuid().ToString(),
+                UserName = registerDTO.UserName
+            };
+
+            var createUserResult = await _userManager.CreateAsync(user, registerDTO.Password);
+            if (!createUserResult.Succeeded)
+            {
+                return StatusCode(StatusCodes.Status500InternalServerError, new ResponseDTO("Error", "The user creation failed!"));
+            }
+            return Ok(new ResponseDTO("Success", "User created successfully!"));
+        }
     }
 }

@@ -80,5 +80,43 @@ namespace CatalogDb.API.Controllers
             }
             return Ok(new ResponseDTO("Success", "User created successfully!"));
         }
+
+        [HttpPost]
+        [Route("refresh-token")]
+        public async Task<IActionResult> RefreshToken(TokenDTO tokenDTO)
+        {
+            if (tokenDTO == null)
+            {
+                return BadRequest("Invalid client request!");
+            }
+
+            string accessToken = tokenDTO.AccessToken ?? throw new ArgumentNullException(nameof(tokenDTO));
+            string refreshToken = tokenDTO.RefreshToken ?? throw new ArgumentNullException(nameof(tokenDTO));
+
+            var principal = _tokenService.GetClaimsPrincipalFromExpiredToken(accessToken, _config);
+            if (principal == null)
+            {
+                return BadRequest("The provided access or refresh token is invalid or expired!");
+            }
+
+            string userName = principal.Identity.Name;
+            var user = await _userManager.FindByNameAsync(userName);
+            if (user == null || user.RefreshToken != refreshToken || user.RefreshTokenExpiryTime <= DateTime.Now)
+            {
+                return BadRequest("The provided access or refresh token is invalid or expired!");
+            }
+
+            var newAccessToken = _tokenService.GenerateAccessToken(principal.Claims.ToList(), _config);
+            var newRefreshToken = _tokenService.GenerateRefreshToken();
+
+            user.RefreshToken = newRefreshToken;
+            await _userManager.UpdateAsync(user);
+
+            return new ObjectResult(new
+            {
+                accessToken = new JwtSecurityTokenHandler().WriteToken(newAccessToken),
+                refreshToken = newRefreshToken,
+            });
+        }
     }
 }

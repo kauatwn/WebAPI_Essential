@@ -1,4 +1,4 @@
 ﻿namespace CatalogDb.API.DTOs
 {
-    public record LoginDTO(string Username, string Password);
+    public record LoginDTO(string UserName, string Password);
 }

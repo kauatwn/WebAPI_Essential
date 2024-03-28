@@ -11,29 +11,29 @@ namespace CatalogDb.API.Migrations
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
         {
-            migrationBuilder.AddColumn<DateTime>(
-                name: "RefreshTokeExpiryTime",
-                table: "AspNetUsers",
-                type: "datetime2",
-                nullable: false,
-                defaultValue: new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified));
-
             migrationBuilder.AddColumn<string>(
                 name: "RefreshToken",
                 table: "AspNetUsers",
                 type: "nvarchar(max)",
                 nullable: true);
+
+            migrationBuilder.AddColumn<DateTime>(
+                name: "RefreshTokenExpiryTime",
+                table: "AspNetUsers",
+                type: "datetime2",
+                nullable: false,
+                defaultValue: new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified));
         }
 
         /// <inheritdoc />
         protected override void Down(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.DropColumn(
-                name: "RefreshTokeExpiryTime",
+                name: "RefreshToken",
                 table: "AspNetUsers");
 
             migrationBuilder.DropColumn(
-                name: "RefreshToken",
+                name: "RefreshTokenExpiryTime",
                 table: "AspNetUsers");
         }
     }

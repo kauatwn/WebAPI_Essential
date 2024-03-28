@@ -12,7 +12,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace CatalogDb.API.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20240328114201_UserApplicationAdjustment")]
+    [Migration("20240328233136_UserApplicationAdjustment")]
     partial class UserApplicationAdjustment
     {
         /// <inheritdoc />
@@ -132,11 +132,11 @@ namespace CatalogDb.API.Migrations
                     b.Property<bool>("PhoneNumberConfirmed")
                         .HasColumnType("bit");
 
-                    b.Property<DateTime>("RefreshTokeExpiryTime")
-                        .HasColumnType("datetime2");
-
                     b.Property<string>("RefreshToken")
                         .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime>("RefreshTokenExpiryTime")
+                        .HasColumnType("datetime2");
 
                     b.Property<string>("SecurityStamp")
                         .HasColumnType("nvarchar(max)");

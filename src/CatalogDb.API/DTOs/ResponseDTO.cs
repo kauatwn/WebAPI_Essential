@@ -1,6 +1,4 @@
 ﻿namespace CatalogDb.API.DTOs
 {
-    public class ResponseDTO
-    {
-    }
+    public record ResponseDTO(string Status, string Message);
 }

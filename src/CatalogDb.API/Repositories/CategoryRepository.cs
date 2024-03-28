@@ -12,7 +12,7 @@ namespace CatalogDb.API.Repositories
             var pagedCategoryList = await PagedList<Category>.ToPagedList(orderedCategories, categoryQuery.PageNumber, categoryQuery.PageSize);
             if (pagedCategoryList.Count == 0)
             {
-                throw new Exception("List of categories not found.");
+                throw new Exception("List of categories not found");
             }
             return pagedCategoryList;
         }

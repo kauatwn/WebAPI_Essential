@@ -12,7 +12,7 @@ namespace CatalogDb.API.Repositories
             var pagedProducts = await PagedList<Product>.ToPagedList(orderedProducts, productQuery.PageNumber, productQuery.PageSize);
             if (pagedProducts.Count == 0)
             {
-                throw new Exception("List of products not found.");
+                throw new Exception("List of products not found");
             }
             return pagedProducts;
         }

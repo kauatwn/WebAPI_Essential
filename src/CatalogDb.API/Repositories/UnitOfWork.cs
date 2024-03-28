@@ -13,9 +13,6 @@ namespace CatalogDb.API.Repositories
         {
             get
             {
-                // Null coalescing.
-                // Se _repository for null, recebe Repository<T>(_context).
-                // Se não, recebe _repository.
                 return _repository ??= new Repository<T>(_context);
             }
         }

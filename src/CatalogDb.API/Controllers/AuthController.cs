@@ -39,6 +39,25 @@ namespace CatalogDb.API.Controllers
         }
 
         [HttpPost]
+        [Route("add-user-to-role")]
+        public async Task<IActionResult> AddUserToRole(string email, string roleName)
+        {
+            var user = await _userManager.FindByNameAsync(email);
+            if (user != null)
+            {
+                var result = await _userManager.AddToRoleAsync(user, roleName);
+                if (result.Succeeded)
+                {
+                    return Ok(new ResponseDTO("Success", $"User {user.Email} added to the {roleName} role!"));
+                } else
+                {
+                    return BadRequest(new ResponseDTO("Error", $"Unable to add user {user.Email} to the {roleName} role!"));
+                }
+            }
+            return BadRequest("Unable to find user!");
+        }
+
+        [HttpPost]
         [Route("login")]
         public async Task<IActionResult> Login(LoginDTO loginDTO)
         {

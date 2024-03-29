@@ -116,7 +116,7 @@ namespace CatalogDb.API.Controllers
             return Ok(new
             {
                 accessToken = new JwtSecurityTokenHandler().WriteToken(newAccessToken),
-                refreshToken = newRefreshToken,
+                refreshToken = newRefreshToken
             });
         }
 

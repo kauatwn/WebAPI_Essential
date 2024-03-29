@@ -11,12 +11,32 @@ namespace CatalogDb.API.Controllers
 {
     [Route("[controller]")]
     [ApiController]
-    public class AuthController(ITokenService tokenService, UserManager<UserApplication> userManager, RoleManager<IdentityRole> roleManager, IConfiguration config) : ControllerBase
+    public class AuthController(ITokenService tokenService, UserManager<ApplicationUser> userManager, RoleManager<IdentityRole> roleManager, IConfiguration config) : ControllerBase
     {
         private readonly ITokenService _tokenService = tokenService;
-        private readonly UserManager<UserApplication> _userManager = userManager;
+        private readonly UserManager<ApplicationUser> _userManager = userManager;
         private readonly RoleManager<IdentityRole> _roleManager = roleManager;
         private readonly IConfiguration _config = config;
+
+        [HttpPost]
+        [Route("create-role")]
+        public async Task<IActionResult> CreateRole(string roleName)
+        {
+            var roleExists = await _roleManager.RoleExistsAsync(roleName);
+            if (!roleExists)
+            {
+                var roleResult = await _roleManager.CreateAsync(new IdentityRole(roleName));
+                if (roleResult.Succeeded)
+                {
+                    return Ok(new ResponseDTO("Success", $"Role {roleName} added successfuly!"));
+                }
+                else
+                {
+                    return BadRequest(new ResponseDTO("Error", $"Issue adding the new {roleName} role!"));
+                }
+            }
+            return BadRequest(new ResponseDTO("Error", "Role already exists!"));
+        }
 
         [HttpPost]
         [Route("login")]
@@ -67,7 +87,7 @@ namespace CatalogDb.API.Controllers
                 return StatusCode(StatusCodes.Status500InternalServerError, new ResponseDTO("Error", "User already exists!"));
             }
 
-            var user = new UserApplication()
+            var user = new ApplicationUser()
             {
                 Email = registerDTO.Email,
                 SecurityStamp = Guid.NewGuid().ToString(),
@@ -123,7 +143,7 @@ namespace CatalogDb.API.Controllers
         [Authorize]
         [HttpPost]
         [Route("revoke/{userName}")]
-        public async Task<ActionResult> Revoke(string userName)
+        public async Task<IActionResult> Revoke(string userName)
         {
             var user = await _userManager.FindByNameAsync(userName);
             if (user == null)

@@ -1,6 +1,5 @@
 ﻿using Microsoft.IdentityModel.Tokens;
 using System.IdentityModel.Tokens.Jwt;
-using System.Security;
 using System.Security.Claims;
 using System.Security.Cryptography;
 using System.Text;
@@ -18,7 +17,7 @@ namespace CatalogDb.API.Services
             var tokenDescriptor = new SecurityTokenDescriptor()
             {
                 Subject = new ClaimsIdentity(claims),
-                Expires = DateTime.UtcNow.AddMinutes(config.GetSection("JWT").GetValue<double>("TokenValidityMinutes")),
+                Expires = DateTime.UtcNow.AddMinutes(config.GetSection("JWT").GetValue<double>("TokenValidityInMinutes")),
                 Audience = config.GetSection("JWT").GetValue<string>("ValidAudience"),
                 Issuer = config.GetSection("JWT").GetValue<string>("ValidIssuer"),
                 SigningCredentials = signingCredentials
@@ -45,8 +44,8 @@ namespace CatalogDb.API.Services
 
             var tokenValidationParameters = new TokenValidationParameters()
             {
-                ValidateAudience = true,
-                ValidateIssuer = true,
+                ValidateAudience = false,
+                ValidateIssuer = false,
                 ValidateIssuerSigningKey = true,
                 IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(secretKey)),
                 ValidateLifetime = false
@@ -58,7 +57,7 @@ namespace CatalogDb.API.Services
             if (securityToken is not JwtSecurityToken jwtSecurityToken ||
                 !jwtSecurityToken.Header.Alg.Equals(SecurityAlgorithms.HmacSha256, StringComparison.InvariantCultureIgnoreCase))
             {
-                throw new SecurityException("Invalid token");
+                throw new SecurityTokenException("Invalid token");
             }
             return principal;
         }

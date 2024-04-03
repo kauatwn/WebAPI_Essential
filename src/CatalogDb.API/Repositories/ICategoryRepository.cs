@@ -5,7 +5,7 @@ namespace CatalogDb.API.Repositories
 {
     public interface ICategoryRepository : IRepository<Category>
     {
-        public Task<PagedList<Category>> GetPagedCategoriesAsync(CategoryQueryParameters categoryQueryParameters);
-        public Task<PagedList<Category>> GetCategoriesFilteredByNameAsync(CategoryNameFilter categoryNameFilter);
+        Task<PagedList<Category>> GetPagedCategoriesAsync(CategoryQueryParameters categoryQueryParameters);
+        Task<PagedList<Category>> GetCategoriesFilteredByNameAsync(CategoryNameFilter categoryNameFilter);
     }
 }

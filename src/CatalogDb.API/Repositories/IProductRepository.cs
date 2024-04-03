@@ -5,7 +5,7 @@ namespace CatalogDb.API.Repositories
 {
     public interface IProductRepository : IRepository<Product>
     {
-        public Task<PagedList<Product>> GetPagedProductsAsync(ProductQueryParameters productQueryParameters);
-        public Task<PagedList<Product>> GetProductsFilteredByPriceAsync(ProductPriceFilter productPriceFilter);
+        Task<PagedList<Product>> GetPagedProductsAsync(ProductQueryParameters productQueryParameters);
+        Task<PagedList<Product>> GetProductsFilteredByPriceAsync(ProductPriceFilter productPriceFilter);
     }
 }

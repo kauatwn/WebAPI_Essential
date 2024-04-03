@@ -8,7 +8,7 @@ namespace CatalogDb.API.Repositories
     {
         public async Task<PagedList<Product>> GetPagedProductsAsync(ProductQueryParameters productQuery)
         {
-            var orderedProducts = GetAll().OrderBy(p => p.Id);
+            IOrderedQueryable<Product> orderedProducts = GetAll().OrderBy(p => p.Id);
             var pagedProducts = await PagedList<Product>.ToPagedList(orderedProducts, productQuery.PageNumber, productQuery.PageSize);
             if (pagedProducts.Count == 0)
             {
@@ -19,7 +19,7 @@ namespace CatalogDb.API.Repositories
 
         public async Task<PagedList<Product>> GetProductsFilteredByPriceAsync(ProductPriceFilter filter)
         {
-            var products = GetAll();
+            IQueryable<Product> products = GetAll();
             if (filter.Price.HasValue && !string.IsNullOrEmpty(filter.PriceCriterion))
             {
                 if (filter.PriceCriterion.Equals("greater", StringComparison.OrdinalIgnoreCase))

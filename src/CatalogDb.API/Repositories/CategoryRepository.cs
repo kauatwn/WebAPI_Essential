@@ -8,7 +8,7 @@ namespace CatalogDb.API.Repositories
     {
         public async Task<PagedList<Category>> GetPagedCategoriesAsync(CategoryQueryParameters categoryQuery)
         {
-            var orderedCategories = GetAll().OrderBy(p => p.Id);
+            IOrderedQueryable<Category> orderedCategories = GetAll().OrderBy(p => p.Id);
             var pagedCategoryList = await PagedList<Category>.ToPagedList(orderedCategories, categoryQuery.PageNumber, categoryQuery.PageSize);
             if (pagedCategoryList.Count == 0)
             {
@@ -19,7 +19,7 @@ namespace CatalogDb.API.Repositories
 
         public async Task<PagedList<Category>> GetCategoriesFilteredByNameAsync(CategoryNameFilter filter)
         {
-            var categories = GetAll();
+            IQueryable<Category> categories = GetAll();
             if (!string.IsNullOrEmpty(filter.Name))
             {
                 categories = categories.Where(c => c.Name.Contains(filter.Name));

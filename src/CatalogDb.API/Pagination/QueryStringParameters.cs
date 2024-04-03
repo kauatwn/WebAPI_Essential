@@ -2,14 +2,14 @@
 {
     public abstract class QueryStringParameters
     {
-        private const int _maxPageSize = 10;
+        private const int MaxPageSize = 10;
         public int PageNumber { get; set; } = 1;
-        private int _pageSize = _maxPageSize;
+        private int _pageSize = MaxPageSize;
 
         public int PageSize
         {
             get { return _pageSize; }
-            set { _pageSize = (value > _maxPageSize) ? _maxPageSize : value; }
+            set { _pageSize = (value > MaxPageSize) ? MaxPageSize : value; }
         }
     }
 }

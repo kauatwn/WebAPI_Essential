@@ -4,7 +4,7 @@ using System.Linq.Expressions;
 
 namespace CatalogDb.API.Repositories
 {
-    public class Repository<T>(AppDbContext context) : IRepository<T> where T : class 
+    public class Repository<T>(AppDbContext context) : IRepository<T> where T : class
     {
         protected readonly AppDbContext _context = context;
 

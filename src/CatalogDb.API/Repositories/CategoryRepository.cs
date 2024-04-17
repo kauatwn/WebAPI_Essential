@@ -8,23 +8,29 @@ namespace CatalogDb.API.Repositories
     {
         public async Task<PagedList<Category>> GetPagedCategoriesAsync(CategoryQueryParameters categoryQuery)
         {
-            IOrderedQueryable<Category> orderedCategories = GetAll().OrderBy(p => p.Id);
-            var pagedCategoryList = await PagedList<Category>.ToPagedList(orderedCategories, categoryQuery.PageNumber, categoryQuery.PageSize);
+            IOrderedQueryable<Category> orderedCategories = GetAll().OrderBy(c => c.Id);
+
+            PagedList<Category> pagedCategoryList = await PagedList<Category>.ToPagedList(orderedCategories, categoryQuery.PageNumber, categoryQuery.PageSize);
+
             if (pagedCategoryList.Count == 0)
             {
                 throw new InvalidOperationException("List of categories not found.");
             }
+
             return pagedCategoryList;
         }
 
         public async Task<PagedList<Category>> GetCategoriesFilteredByNameAsync(CategoryNameFilter filter)
         {
             IQueryable<Category> categories = GetAll();
+
             if (!string.IsNullOrEmpty(filter.Name))
             {
                 categories = categories.Where(c => c.Name.Contains(filter.Name));
             }
-            var filteredCategories = await PagedList<Category>.ToPagedList(categories, filter.PageNumber, filter.PageSize);
+
+            PagedList<Category> filteredCategories = await PagedList<Category>.ToPagedList(categories, filter.PageNumber, filter.PageSize);
+
             return filteredCategories;
         }
     }

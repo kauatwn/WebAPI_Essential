@@ -22,7 +22,8 @@ namespace CatalogDb.API.Extensions
                         await context.Response.WriteAsync(new ErrorDetails()
                         {
                             StatusCode = context.Response.StatusCode,
-                            Message = contextFeature.Error.Message
+                            Message = contextFeature.Error.Message,
+                            Trace = contextFeature.Error.StackTrace
                         }.ToString());
                     }
                 });

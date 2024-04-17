@@ -22,10 +22,12 @@ namespace CatalogDb.API.Controllers
         [Route("create-role")]
         public async Task<IActionResult> CreateRole(string roleName)
         {
-            var roleExists = await _roleManager.RoleExistsAsync(roleName);
+            bool roleExists = await _roleManager.RoleExistsAsync(roleName);
+
             if (!roleExists)
             {
-                var roleResult = await _roleManager.CreateAsync(new IdentityRole(roleName));
+                IdentityResult roleResult = await _roleManager.CreateAsync(new IdentityRole(roleName));
+
                 if (roleResult.Succeeded)
                 {
                     return Ok(new ResponseDTO("Success", $"Role {roleName} added successfuly!"));
@@ -35,6 +37,7 @@ namespace CatalogDb.API.Controllers
                     return BadRequest(new ResponseDTO("Error", $"Issue adding the new {roleName} role!"));
                 }
             }
+
             return BadRequest(new ResponseDTO("Error", "Role already exists!"));
         }
 
@@ -42,18 +45,22 @@ namespace CatalogDb.API.Controllers
         [Route("add-user-to-role")]
         public async Task<IActionResult> AddUserToRole(string email, string roleName)
         {
-            var user = await _userManager.FindByNameAsync(email);
+            ApplicationUser? user = await _userManager.FindByNameAsync(email);
+
             if (user != null)
             {
-                var result = await _userManager.AddToRoleAsync(user, roleName);
+                IdentityResult result = await _userManager.AddToRoleAsync(user, roleName);
+
                 if (result.Succeeded)
                 {
                     return Ok(new ResponseDTO("Success", $"User {user.Email} added to the {roleName} role!"));
-                } else
+                }
+                else
                 {
                     return BadRequest(new ResponseDTO("Error", $"Unable to add user {user.Email} to the {roleName} role!"));
                 }
             }
+
             return BadRequest("Unable to find user!");
         }
 
@@ -61,11 +68,12 @@ namespace CatalogDb.API.Controllers
         [Route("login")]
         public async Task<IActionResult> Login(LoginDTO loginDTO)
         {
-            var user = await _userManager.FindByNameAsync(loginDTO.UserName);
+            ApplicationUser? user = await _userManager.FindByNameAsync(loginDTO.UserName);
 
             if (user != null && await _userManager.CheckPasswordAsync(user, loginDTO.Password))
             {
-                var userRoles = await _userManager.GetRolesAsync(user);
+                IList<string> userRoles = await _userManager.GetRolesAsync(user);
+
                 var authClaims = new List<Claim>
                 {
                     new(ClaimTypes.Name, user.UserName!),
@@ -78,12 +86,14 @@ namespace CatalogDb.API.Controllers
                     authClaims.Add(new Claim(ClaimTypes.Role, userRole));
                 }
 
-                var token = _tokenService.GenerateAccessToken(authClaims, _config);
-                var refreshToken = _tokenService.GenerateRefreshToken();
+                JwtSecurityToken token = _tokenService.GenerateAccessToken(authClaims, _config);
+
+                string refreshToken = _tokenService.GenerateRefreshToken();
                 _ = int.TryParse(_config["JWT:RefreshTokenValidityInMinutes"], out int refreshTokenValidityInMinutes);
 
                 user.RefreshTokenExpiryTime = DateTime.UtcNow.AddMinutes(refreshTokenValidityInMinutes);
                 user.RefreshToken = refreshToken;
+
                 await _userManager.UpdateAsync(user);
 
                 return Ok(new
@@ -100,7 +110,8 @@ namespace CatalogDb.API.Controllers
         [Route("register")]
         public async Task<IActionResult> Register(RegisterDTO registerDTO)
         {
-            var userExists = await _userManager.FindByNameAsync(registerDTO.UserName);
+            ApplicationUser? userExists = await _userManager.FindByNameAsync(registerDTO.UserName);
+
             if (userExists != null)
             {
                 return StatusCode(StatusCodes.Status500InternalServerError, new ResponseDTO("Error", "User already exists!"));
@@ -113,11 +124,13 @@ namespace CatalogDb.API.Controllers
                 UserName = registerDTO.UserName
             };
 
-            var createUserResult = await _userManager.CreateAsync(user, registerDTO.Password);
+            IdentityResult createUserResult = await _userManager.CreateAsync(user, registerDTO.Password);
+
             if (!createUserResult.Succeeded)
             {
                 return StatusCode(StatusCodes.Status500InternalServerError, new ResponseDTO("Error", "The user creation failed!"));
             }
+
             return Ok(new ResponseDTO("Success", "User created successfully!"));
         }
 
@@ -133,21 +146,23 @@ namespace CatalogDb.API.Controllers
             string accessToken = tokenDTO.AccessToken ?? throw new ArgumentNullException(nameof(tokenDTO));
             string refreshToken = tokenDTO.RefreshToken ?? throw new ArgumentNullException(nameof(tokenDTO));
 
-            var principal = _tokenService.GetClaimsPrincipalFromExpiredToken(accessToken, _config);
+            ClaimsPrincipal principal = _tokenService.GetClaimsPrincipalFromExpiredToken(accessToken, _config);
+
             if (principal == null)
             {
                 return BadRequest("The provided access or refresh token is invalid or expired!");
             }
 
             string userName = principal.Identity.Name;
-            var user = await _userManager.FindByNameAsync(userName);
+
+            ApplicationUser? user = await _userManager.FindByNameAsync(userName);
             if (user == null || user.RefreshToken != refreshToken || user.RefreshTokenExpiryTime <= DateTime.Now)
             {
                 return BadRequest("The provided access or refresh token is invalid or expired!");
             }
 
-            var newAccessToken = _tokenService.GenerateAccessToken(principal.Claims.ToList(), _config);
-            var newRefreshToken = _tokenService.GenerateRefreshToken();
+            JwtSecurityToken newAccessToken = _tokenService.GenerateAccessToken(principal.Claims.ToList(), _config);
+            string newRefreshToken = _tokenService.GenerateRefreshToken();
 
             user.RefreshToken = newRefreshToken;
             await _userManager.UpdateAsync(user);
@@ -164,14 +179,17 @@ namespace CatalogDb.API.Controllers
         [Route("revoke/{userName}")]
         public async Task<IActionResult> Revoke(string userName)
         {
-            var user = await _userManager.FindByNameAsync(userName);
+            ApplicationUser? user = await _userManager.FindByNameAsync(userName);
+
             if (user == null)
             {
                 return BadRequest("Ivalid user name!");
             }
 
             user.RefreshToken = null;
+
             await _userManager.UpdateAsync(user);
+
             return NoContent();
         }
     }

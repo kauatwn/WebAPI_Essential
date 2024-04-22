@@ -10,15 +10,21 @@ namespace CatalogDb.API.Controllers
 {
     [Route("[controller]")]
     [ApiController]
-    public class ProductsController(IUnitOfWork<Product> unitOfWork, IMapper mapper) : ControllerBase
+    public class ProductsController : ControllerBase
     {
-        private readonly IUnitOfWork<Product> _unitOfWork = unitOfWork;
-        private readonly IMapper _mapper = mapper;
+        private IUnitOfWork<Product> UnitOfWork { get; }
+        private IMapper Mapper { get; }
+
+        public ProductsController(IUnitOfWork<Product> unitOfWork, IMapper mapper)
+        {
+            UnitOfWork = unitOfWork;
+            Mapper = mapper;
+        }
 
         [HttpGet]
         public async Task<ActionResult<IEnumerable<ProductDTO>>> Get([FromQuery] ProductQueryParameters productQuery)
         {
-            PagedList<Product> products = await _unitOfWork.ProductRepository.GetPagedProductsAsync(productQuery);
+            PagedList<Product> products = await UnitOfWork.ProductRepository.GetPagedProductsAsync(productQuery);
 
             return GenerateResponse(products);
         }
@@ -26,7 +32,7 @@ namespace CatalogDb.API.Controllers
         [HttpGet("filtered-by-price")]
         public async Task<ActionResult<IEnumerable<ProductDTO>>> GetProductsFilteredByPrice([FromQuery] ProductPriceFilter filter)
         {
-            PagedList<Product> products = await _unitOfWork.ProductRepository.GetProductsFilteredByPriceAsync(filter);
+            PagedList<Product> products = await UnitOfWork.ProductRepository.GetProductsFilteredByPriceAsync(filter);
 
             return GenerateResponse(products);
         }
@@ -34,14 +40,14 @@ namespace CatalogDb.API.Controllers
         [HttpGet("{id:int}", Name = "ObterProduto")]
         public async Task<ActionResult<ProductDTO>> Get(int id)
         {
-            Product? product = await _unitOfWork.Repository.GetAsync(p => p.Id == id);
-            
+            Product? product = await UnitOfWork.Repository.GetAsync(p => p.Id == id);
+
             if (product == null)
             {
                 return NotFound();
             }
 
-            ProductDTO productDto = _mapper.Map<ProductDTO>(product);
+            ProductDTO productDto = Mapper.Map<ProductDTO>(product);
 
             return Ok(productDto);
         }
@@ -54,12 +60,12 @@ namespace CatalogDb.API.Controllers
                 return BadRequest();
             }
 
-            Product product = _mapper.Map<Product>(productDto);
-            Product createdProduct = _unitOfWork.Repository.Create(product);
+            Product product = Mapper.Map<Product>(productDto);
+            Product createdProduct = UnitOfWork.Repository.Create(product);
 
-            await _unitOfWork.CommitAsync();
+            await UnitOfWork.CommitAsync();
 
-            ProductDTO createdProductDto = _mapper.Map<ProductDTO>(createdProduct);
+            ProductDTO createdProductDto = Mapper.Map<ProductDTO>(createdProduct);
 
             return new CreatedAtRouteResult("ObterProduto", new { id = product.Id }, createdProductDto);
         }
@@ -72,12 +78,12 @@ namespace CatalogDb.API.Controllers
                 return BadRequest();
             }
 
-            Product product = _mapper.Map<Product>(productDto);
-            Product updatedProduct = _unitOfWork.Repository.Update(product);
+            Product product = Mapper.Map<Product>(productDto);
+            Product updatedProduct = UnitOfWork.Repository.Update(product);
 
-            await _unitOfWork.CommitAsync();
+            await UnitOfWork.CommitAsync();
 
-            ProductDTO updatedProductDto = _mapper.Map<ProductDTO>(updatedProduct);
+            ProductDTO updatedProductDto = Mapper.Map<ProductDTO>(updatedProduct);
 
             return Ok(updatedProductDto);
         }
@@ -85,18 +91,18 @@ namespace CatalogDb.API.Controllers
         [HttpDelete("{id:int}")]
         public async Task<ActionResult<ProductDTO>> Delete(int id)
         {
-            Product? product = await _unitOfWork.Repository.GetAsync(p => p.Id == id);
+            Product? product = await UnitOfWork.Repository.GetAsync(p => p.Id == id);
 
             if (product == null)
             {
                 return NotFound();
             }
 
-            Product deletedProduct = _unitOfWork.Repository.Delete(product);
+            Product deletedProduct = UnitOfWork.Repository.Delete(product);
 
-            await _unitOfWork.CommitAsync();
+            await UnitOfWork.CommitAsync();
 
-            ProductDTO deletedProductDto = _mapper.Map<ProductDTO>(deletedProduct);
+            ProductDTO deletedProductDto = Mapper.Map<ProductDTO>(deletedProduct);
 
             return Ok(deletedProductDto);
         }
@@ -117,7 +123,7 @@ namespace CatalogDb.API.Controllers
             // Número da página atual, tamanho da página, total de itens, etc.
             Response.Headers.Append("X-Pagination", JsonConvert.SerializeObject(metadata));
 
-            IEnumerable<ProductDTO> productsDto = _mapper.Map<IEnumerable<ProductDTO>>(products);
+            IEnumerable<ProductDTO> productsDto = Mapper.Map<IEnumerable<ProductDTO>>(products);
 
             return Ok(productsDto);
         }

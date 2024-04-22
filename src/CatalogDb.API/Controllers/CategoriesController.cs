@@ -10,15 +10,21 @@ namespace CatalogDb.API.Controllers
 {
     [Route("[controller]")]
     [ApiController]
-    public class CategoriesController(IUnitOfWork<Category> unitOfWork, IMapper mapper) : ControllerBase
+    public class CategoriesController : ControllerBase
     {
-        private readonly IUnitOfWork<Category> _unitOfWork = unitOfWork;
-        private readonly IMapper _mapper = mapper;
+        private IUnitOfWork<Category> UnitOfWork { get; }
+        private IMapper Mapper { get; }
+
+        public CategoriesController(IUnitOfWork<Category> unitOfWork, IMapper mapper)
+        {
+            UnitOfWork = unitOfWork;
+            Mapper = mapper;
+        }
 
         [HttpGet]
         public async Task<ActionResult<IEnumerable<CategoryDTO>>> Get([FromQuery] CategoryQueryParameters categoryQuery)
         {
-            PagedList<Category> categories = await _unitOfWork.CategoryRepository.GetPagedCategoriesAsync(categoryQuery);
+            PagedList<Category> categories = await UnitOfWork.CategoryRepository.GetPagedCategoriesAsync(categoryQuery);
 
             return GenerateResponse(categories);
         }
@@ -26,7 +32,7 @@ namespace CatalogDb.API.Controllers
         [HttpGet("filtered-by-name")]
         public async Task<ActionResult<IEnumerable<CategoryDTO>>> GetCategoriesFilteredByName([FromQuery] CategoryNameFilter filter)
         {
-            PagedList<Category> categories = await _unitOfWork.CategoryRepository.GetCategoriesFilteredByNameAsync(filter);
+            PagedList<Category> categories = await UnitOfWork.CategoryRepository.GetCategoriesFilteredByNameAsync(filter);
 
             return GenerateResponse(categories);
         }
@@ -34,14 +40,14 @@ namespace CatalogDb.API.Controllers
         [HttpGet("{id:int}", Name = "ObterCategoria")]
         public async Task<ActionResult<CategoryDTO>> Get(int id)
         {
-            Category? category = await _unitOfWork.Repository.GetAsync(c => c.Id == id);
+            Category? category = await UnitOfWork.Repository.GetAsync(c => c.Id == id);
 
             if (category == null)
             {
                 return NotFound();
             }
 
-            CategoryDTO categoryDto = _mapper.Map<CategoryDTO>(category);
+            CategoryDTO categoryDto = Mapper.Map<CategoryDTO>(category);
 
             return Ok(categoryDto);
         }
@@ -54,12 +60,12 @@ namespace CatalogDb.API.Controllers
                 return BadRequest();
             }
 
-            Category category = _mapper.Map<Category>(categoryDto);
-            Category createdCategory = _unitOfWork.Repository.Create(category);
+            Category category = Mapper.Map<Category>(categoryDto);
+            Category createdCategory = UnitOfWork.Repository.Create(category);
 
-            await _unitOfWork.CommitAsync();
+            await UnitOfWork.CommitAsync();
 
-            CategoryDTO createdCategoryDto = _mapper.Map<CategoryDTO>(createdCategory);
+            CategoryDTO createdCategoryDto = Mapper.Map<CategoryDTO>(createdCategory);
 
             return new CreatedAtRouteResult("ObterCategoria", new { id = category.Id }, createdCategoryDto);
         }
@@ -72,12 +78,12 @@ namespace CatalogDb.API.Controllers
                 return BadRequest();
             }
 
-            Category category = _mapper.Map<Category>(id);
-            Category updatedCategory = _unitOfWork.Repository.Update(category);
+            Category category = Mapper.Map<Category>(id);
+            Category updatedCategory = UnitOfWork.Repository.Update(category);
 
-            await _unitOfWork.CommitAsync();
+            await UnitOfWork.CommitAsync();
 
-            CategoryDTO updatedCategoryDto = _mapper.Map<CategoryDTO>(updatedCategory);
+            CategoryDTO updatedCategoryDto = Mapper.Map<CategoryDTO>(updatedCategory);
 
             return Ok(updatedCategoryDto);
         }
@@ -85,18 +91,18 @@ namespace CatalogDb.API.Controllers
         [HttpDelete("{id:int}")]
         public async Task<ActionResult<CategoryDTO>> Delete(int id)
         {
-            Category? category = await _unitOfWork.Repository.GetAsync(c => c.Id == id);
+            Category? category = await UnitOfWork.Repository.GetAsync(c => c.Id == id);
 
             if (category == null)
             {
                 return NotFound();
             }
 
-            Category deletedCategory = _unitOfWork.Repository.Delete(category);
+            Category deletedCategory = UnitOfWork.Repository.Delete(category);
 
-            await _unitOfWork.CommitAsync();
+            await UnitOfWork.CommitAsync();
 
-            CategoryDTO deletedCategoryDto = _mapper.Map<CategoryDTO>(deletedCategory);
+            CategoryDTO deletedCategoryDto = Mapper.Map<CategoryDTO>(deletedCategory);
 
             return Ok(deletedCategoryDto);
         }
@@ -115,7 +121,7 @@ namespace CatalogDb.API.Controllers
 
             Response.Headers.Append("X-Pagination", JsonConvert.SerializeObject(metadata));
 
-            IEnumerable<CategoryDTO> categoriesDto = _mapper.Map<IEnumerable<CategoryDTO>>(categories);
+            IEnumerable<CategoryDTO> categoriesDto = Mapper.Map<IEnumerable<CategoryDTO>>(categories);
 
             return Ok(categoriesDto);
         }

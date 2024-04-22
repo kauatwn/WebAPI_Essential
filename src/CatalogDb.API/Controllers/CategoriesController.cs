@@ -22,11 +22,33 @@ namespace CatalogDb.API.Controllers
         }
 
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<CategoryDTO>>> Get([FromQuery] CategoryQueryParameters categoryQuery)
+        public async Task<ActionResult<IEnumerable<CategoryDTO>>> Get([FromQuery] CategoryQueryParameters query)
         {
-            PagedList<Category> categories = await UnitOfWork.CategoryRepository.GetPagedCategoriesAsync(categoryQuery);
+            PagedList<Category> categories = await UnitOfWork.CategoryRepository.GetPagedCategoriesAsync(query);
 
             return GenerateResponse(categories);
+        }
+
+        [HttpGet("with-products")]
+        public async Task<ActionResult<IEnumerable<CategoryWithProductsDTO>>> GetCategoriesWithProducts([FromQuery] CategoryQueryParameters query)
+        {
+            PagedList<Category> categoriesWithProducts = await UnitOfWork.CategoryRepository.GetCategoriesWithProductsAsync(query);
+
+            object metadata = new
+            {
+                categoriesWithProducts.TotalCount,
+                categoriesWithProducts.PageSize,
+                categoriesWithProducts.CurrentPage,
+                categoriesWithProducts.TotalPages,
+                categoriesWithProducts.HasPreviousPage,
+                categoriesWithProducts.HasNextPage
+            };
+
+            Response.Headers.Append("X-Pagination", JsonConvert.SerializeObject(metadata));
+
+            IEnumerable<CategoryWithProductsDTO> categoriesWithProductsDto = Mapper.Map<IEnumerable<CategoryWithProductsDTO>>(categoriesWithProducts);
+
+            return Ok(categoriesWithProductsDto);
         }
 
         [HttpGet("filtered-by-name")]

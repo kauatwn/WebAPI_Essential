@@ -4,21 +4,16 @@ namespace CatalogDb.API.Entities
 {
     public class Category
     {
+        [Key]
         public int Id { get; set; }
 
         [Required]
         [StringLength(80)]
-        public string Name { get; set; } = string.Empty;
+        public string? Name { get; set; }
 
-        [Required]
-        [StringLength(300)]
-        public string ImageUrl { get; set; } = string.Empty;
+        [StringLength(250)]
+        public string? ImageUrl { get; set; }
 
-        public List<Product> Products { get; set; }
-
-        public Category()
-        {
-            Products = [];
-        }
+        public ICollection<Product> Products { get; } = [];
     }
 }

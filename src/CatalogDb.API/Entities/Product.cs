@@ -28,7 +28,5 @@ namespace CatalogDb.API.Entities
 
         [ForeignKey(nameof(Category.Id))]
         public int CategoryId { get; set; }
-
-        public Category? Category { get; }
     }
 }

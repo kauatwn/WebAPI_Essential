@@ -2,18 +2,24 @@
 
 namespace CatalogDb.API.Repositories
 {
-    public class UnitOfWork<T>(AppDbContext context) : IUnitOfWork<T> where T : class
+    public class UnitOfWork<T> : IUnitOfWork<T> where T : class
     {
         private IRepository<T>? _repository;
         private ICategoryRepository? _categoryRepository;
         private IProductRepository? _productRepository;
-        private readonly AppDbContext _context = context;
+
+        private AppDbContext Context { get; }
+
+        public UnitOfWork(AppDbContext context)
+        {
+            Context = context;
+        }
 
         public IRepository<T> Repository
         {
             get
             {
-                return _repository ??= new Repository<T>(_context);
+                return _repository ??= new Repository<T>(Context);
             }
         }
 
@@ -21,7 +27,7 @@ namespace CatalogDb.API.Repositories
         {
             get
             {
-                return _categoryRepository ??= new CategoryRepository(_context);
+                return _categoryRepository ??= new CategoryRepository(Context);
             }
         }
 
@@ -29,18 +35,18 @@ namespace CatalogDb.API.Repositories
         {
             get
             {
-                return _productRepository ??= new ProductRepository(_context);
+                return _productRepository ??= new ProductRepository(Context);
             }
         }
 
         public async Task CommitAsync()
         {
-            await _context.SaveChangesAsync();
+            await Context.SaveChangesAsync();
         }
 
         public void Dispose()
         {
-            _context.Dispose();
+            Context.Dispose();
         }
     }
 }

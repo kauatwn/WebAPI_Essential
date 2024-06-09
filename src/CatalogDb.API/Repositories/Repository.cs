@@ -4,35 +4,40 @@ using System.Linq.Expressions;
 
 namespace CatalogDb.API.Repositories
 {
-    public class Repository<T>(AppDbContext context) : IRepository<T> where T : class
+    public class Repository<T> : IRepository<T> where T : class
     {
-        protected readonly AppDbContext _context = context;
+        protected AppDbContext Context { get; }
+
+        public Repository(AppDbContext context)
+        {
+            Context = context;
+        }
 
         public IQueryable<T> GetAll()
         {
-            return _context.Set<T>().AsNoTracking();
+            return Context.Set<T>().AsNoTracking();
         }
 
         public async Task<T?> GetAsync(Expression<Func<T, bool>> predicate)
         {
-            return await _context.Set<T>().AsNoTracking().FirstOrDefaultAsync(predicate);
+            return await Context.Set<T>().AsNoTracking().FirstOrDefaultAsync(predicate);
         }
 
         public T Create(T entity)
         {
-            _context.Set<T>().Add(entity);
+            Context.Set<T>().Add(entity);
             return entity;
         }
 
         public T Update(T entity)
         {
-            _context.Set<T>().Update(entity);
+            Context.Set<T>().Update(entity);
             return entity;
         }
 
         public T Delete(T entity)
         {
-            _context.Set<T>().Remove(entity);
+            Context.Set<T>().Remove(entity);
             return entity;
         }
     }

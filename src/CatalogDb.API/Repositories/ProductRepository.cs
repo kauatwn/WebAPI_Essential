@@ -4,8 +4,12 @@ using CatalogDb.API.Pagination;
 
 namespace CatalogDb.API.Repositories
 {
-    public class ProductRepository(AppDbContext context) : Repository<Product>(context), IProductRepository
+    public class ProductRepository : Repository<Product>, IProductRepository
     {
+        public ProductRepository(AppDbContext context) : base(context)
+        {
+        }
+
         public async Task<PagedList<Product>> GetPagedProductsAsync(ProductQueryParameters productQuery)
         {
             IOrderedQueryable<Product> orderedProducts = GetAll().OrderBy(p => p.Id);

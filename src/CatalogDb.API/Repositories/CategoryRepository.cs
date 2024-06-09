@@ -41,7 +41,7 @@ namespace CatalogDb.API.Repositories
 
         public async Task<PagedList<Category>> GetCategoriesWithProductsAsync(CategoryQueryParameters query)
         {
-            IQueryable<Category> categoriesWithProducts = _context.Categories.Include(c => c.Products);
+            IQueryable<Category> categoriesWithProducts = Context.Categories.Include(c => c.Products);
 
             PagedList<Category> pagedCategoriesWithProducts = await PagedList<Category>.ToPagedList(categoriesWithProducts, query.PageNumber, query.PageSize);
 

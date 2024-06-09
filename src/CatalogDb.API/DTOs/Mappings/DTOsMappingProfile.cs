@@ -9,7 +9,6 @@ namespace CatalogDb.API.DTOs.Mappings
         {
             CreateMap<Product, ProductDTO>().ReverseMap();
             CreateMap<Category, CategoryDTO>().ReverseMap();
-            CreateMap<Category, CategoryWithProductsDTO>().ReverseMap();
         }
     }
 }

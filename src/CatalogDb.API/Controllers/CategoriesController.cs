@@ -22,45 +22,15 @@ namespace CatalogDb.API.Controllers
         }
 
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<CategoryDTO>>> Get([FromQuery] CategoryQueryParameters query)
+        public async Task<ActionResult<IEnumerable<CategoryDTO>>> GetCategoryById([FromQuery] CategoryQueryParameters query)
         {
             PagedList<Category> categories = await UnitOfWork.CategoryRepository.GetPagedCategoriesAsync(query);
 
             return GenerateResponse(categories);
         }
 
-        [HttpGet("with-products")]
-        public async Task<ActionResult<IEnumerable<CategoryWithProductsDTO>>> GetCategoriesWithProducts([FromQuery] CategoryQueryParameters query)
-        {
-            PagedList<Category> categoriesWithProducts = await UnitOfWork.CategoryRepository.GetCategoriesWithProductsAsync(query);
-
-            object metadata = new
-            {
-                categoriesWithProducts.TotalCount,
-                categoriesWithProducts.PageSize,
-                categoriesWithProducts.CurrentPage,
-                categoriesWithProducts.TotalPages,
-                categoriesWithProducts.HasPreviousPage,
-                categoriesWithProducts.HasNextPage
-            };
-
-            Response.Headers.Append("X-Pagination", JsonConvert.SerializeObject(metadata));
-
-            IEnumerable<CategoryWithProductsDTO> categoriesWithProductsDto = Mapper.Map<IEnumerable<CategoryWithProductsDTO>>(categoriesWithProducts);
-
-            return Ok(categoriesWithProductsDto);
-        }
-
-        [HttpGet("filtered-by-name")]
-        public async Task<ActionResult<IEnumerable<CategoryDTO>>> GetCategoriesFilteredByName([FromQuery] CategoryNameFilter filter)
-        {
-            PagedList<Category> categories = await UnitOfWork.CategoryRepository.GetCategoriesFilteredByNameAsync(filter);
-
-            return GenerateResponse(categories);
-        }
-
-        [HttpGet("{id:int}", Name = "ObterCategoria")]
-        public async Task<ActionResult<CategoryDTO>> Get(int id)
+        [HttpGet("{id:int}", Name = nameof(GetCategoryById))]
+        public async Task<ActionResult<CategoryDTO>> GetCategoryById(int id)
         {
             Category? category = await UnitOfWork.Repository.GetAsync(c => c.Id == id);
 
@@ -72,6 +42,14 @@ namespace CatalogDb.API.Controllers
             CategoryDTO categoryDto = Mapper.Map<CategoryDTO>(category);
 
             return Ok(categoryDto);
+        }
+
+        [HttpGet("filtered-by-name")]
+        public async Task<ActionResult<IEnumerable<CategoryDTO>>> GetCategoriesFilteredByName([FromQuery] CategoryNameFilter filter)
+        {
+            PagedList<Category> categories = await UnitOfWork.CategoryRepository.GetCategoriesFilteredByNameAsync(filter);
+
+            return GenerateResponse(categories);
         }
 
         [HttpPost]
@@ -89,7 +67,7 @@ namespace CatalogDb.API.Controllers
 
             CategoryDTO createdCategoryDto = Mapper.Map<CategoryDTO>(createdCategory);
 
-            return new CreatedAtRouteResult("ObterCategoria", new { id = category.Id }, createdCategoryDto);
+            return CreatedAtRoute(nameof(GetCategoryById), new { id = category.Id }, createdCategoryDto);
         }
 
         [HttpPut("{id:int}")]

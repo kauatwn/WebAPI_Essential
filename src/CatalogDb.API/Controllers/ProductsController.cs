@@ -29,16 +29,8 @@ namespace CatalogDb.API.Controllers
             return GenerateResponse(products);
         }
 
-        [HttpGet("filtered-by-price")]
-        public async Task<ActionResult<IEnumerable<ProductDTO>>> GetProductsFilteredByPrice([FromQuery] ProductPriceFilter filter)
-        {
-            PagedList<Product> products = await UnitOfWork.ProductRepository.GetProductsFilteredByPriceAsync(filter);
-
-            return GenerateResponse(products);
-        }
-
-        [HttpGet("{id:int}", Name = "ObterProduto")]
-        public async Task<ActionResult<ProductDTO>> Get(int id)
+        [HttpGet("{id:int}", Name = nameof(GetProductById))]
+        public async Task<ActionResult<ProductDTO>> GetProductById(int id)
         {
             Product? product = await UnitOfWork.Repository.GetAsync(p => p.Id == id);
 
@@ -50,6 +42,14 @@ namespace CatalogDb.API.Controllers
             ProductDTO productDto = Mapper.Map<ProductDTO>(product);
 
             return Ok(productDto);
+        }
+
+        [HttpGet("filtered-by-price")]
+        public async Task<ActionResult<IEnumerable<ProductDTO>>> GetProductsFilteredByPrice([FromQuery] ProductPriceFilter filter)
+        {
+            PagedList<Product> products = await UnitOfWork.ProductRepository.GetProductsFilteredByPriceAsync(filter);
+
+            return GenerateResponse(products);
         }
 
         [HttpPost]
@@ -67,7 +67,7 @@ namespace CatalogDb.API.Controllers
 
             ProductDTO createdProductDto = Mapper.Map<ProductDTO>(createdProduct);
 
-            return new CreatedAtRouteResult("ObterProduto", new { id = product.Id }, createdProductDto);
+            return CreatedAtRoute(nameof(GetProductById), new { id = product.Id }, createdProductDto);
         }
 
         [HttpPut("{id:int}")]

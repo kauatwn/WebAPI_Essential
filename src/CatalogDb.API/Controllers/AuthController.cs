@@ -27,7 +27,7 @@ namespace CatalogDb.API.Controllers
         }
 
         [HttpPost]
-        [Route("create-role")]
+        [Route("CreateRole")]
         public async Task<IActionResult> CreateRole(string roleName)
         {
             bool roleExists = await RoleManager.RoleExistsAsync(roleName);
@@ -38,42 +38,42 @@ namespace CatalogDb.API.Controllers
 
                 if (roleResult.Succeeded)
                 {
-                    return Ok(new ResponseDTO("Success", $"Role {roleName} added successfuly!"));
+                    return Ok(new ResponseDTO("Success", $"Role '{roleName}' added successfully!"));
                 }
                 else
                 {
-                    return BadRequest(new ResponseDTO("Error", $"Issue adding the new {roleName} role!"));
+                    return BadRequest(new ResponseDTO("Error", $"Failed to add the new role '{roleName}'!"));
                 }
             }
 
-            return BadRequest(new ResponseDTO("Error", "Role already exists!"));
+            return Conflict(new ResponseDTO("Error", $"Role '{roleName}' already exists!"));
         }
 
         [HttpPost]
-        [Route("add-user-to-role")]
+        [Route("AddUserToRole")]
         public async Task<IActionResult> AddUserToRole(string email, string roleName)
         {
-            ApplicationUser? user = await UserManager.FindByNameAsync(email);
+            ApplicationUser? userExists = await UserManager.FindByEmailAsync(email);
 
-            if (user != null)
+            if (userExists != null)
             {
-                IdentityResult result = await UserManager.AddToRoleAsync(user, roleName);
+                IdentityResult result = await UserManager.AddToRoleAsync(userExists, roleName);
 
                 if (result.Succeeded)
                 {
-                    return Ok(new ResponseDTO("Success", $"User {user.Email} added to the {roleName} role!"));
+                    return Ok(new ResponseDTO("Success", $"User '{userExists.Email}' added to the '{roleName}' role!"));
                 }
                 else
                 {
-                    return BadRequest(new ResponseDTO("Error", $"Unable to add user {user.Email} to the {roleName} role!"));
+                    return Conflict(new ResponseDTO("Error", $"Failed to add user '{userExists.Email}' to the '{roleName}' role!"));
                 }
             }
 
-            return BadRequest("Unable to find user!");
+            return NotFound(new ResponseDTO("Error", "User not found!"));
         }
 
         [HttpPost]
-        [Route("login")]
+        [Route("Login")]
         public async Task<IActionResult> Login(LoginDTO loginDTO)
         {
             ApplicationUser? user = await UserManager.FindByNameAsync(loginDTO.UserName);
@@ -89,7 +89,7 @@ namespace CatalogDb.API.Controllers
                     new(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString())
                 };
 
-                foreach (var userRole in userRoles)
+                foreach (string userRole in userRoles)
                 {
                     authClaims.Add(new Claim(ClaimTypes.Role, userRole));
                 }
@@ -111,18 +111,19 @@ namespace CatalogDb.API.Controllers
                     Expiry = token.ValidTo
                 });
             }
+
             return Unauthorized();
         }
 
         [HttpPost]
-        [Route("register")]
+        [Route("Register")]
         public async Task<IActionResult> Register(RegisterDTO registerDTO)
         {
             ApplicationUser? userExists = await UserManager.FindByNameAsync(registerDTO.UserName);
 
             if (userExists != null)
             {
-                return StatusCode(StatusCodes.Status500InternalServerError, new ResponseDTO("Error", "User already exists!"));
+                return Conflict(new ResponseDTO("Error", "User already exists!"));
             }
 
             var user = new ApplicationUser()
@@ -136,14 +137,14 @@ namespace CatalogDb.API.Controllers
 
             if (!createUserResult.Succeeded)
             {
-                return StatusCode(StatusCodes.Status500InternalServerError, new ResponseDTO("Error", "The user creation failed!"));
+                return BadRequest(new ResponseDTO("Error", "Failed to create the user!"));
             }
 
             return Ok(new ResponseDTO("Success", "User created successfully!"));
         }
 
         [HttpPost]
-        [Route("refresh-token")]
+        [Route("RefreshToken")]
         public async Task<IActionResult> RefreshToken(TokenDTO tokenDTO)
         {
             if (tokenDTO == null)
@@ -158,7 +159,7 @@ namespace CatalogDb.API.Controllers
 
             if (principal == null)
             {
-                return BadRequest("The provided access or refresh token is invalid or expired!");
+                return Unauthorized("The provided access or refresh token is invalid or expired!");
             }
 
             string userName = principal.Identity.Name;
@@ -166,7 +167,7 @@ namespace CatalogDb.API.Controllers
             ApplicationUser? user = await UserManager.FindByNameAsync(userName);
             if (user == null || user.RefreshToken != refreshToken || user.RefreshTokenExpiryTime <= DateTime.Now)
             {
-                return BadRequest("The provided access or refresh token is invalid or expired!");
+                return Unauthorized("The provided access or refresh token is invalid or expired!");
             }
 
             JwtSecurityToken newAccessToken = TokenService.GenerateAccessToken(principal.Claims.ToList(), Config);
@@ -184,7 +185,7 @@ namespace CatalogDb.API.Controllers
 
         [Authorize]
         [HttpPost]
-        [Route("revoke/{userName}")]
+        [Route("Revoke/{userName}")]
         public async Task<IActionResult> Revoke(string userName)
         {
             ApplicationUser? user = await UserManager.FindByNameAsync(userName);

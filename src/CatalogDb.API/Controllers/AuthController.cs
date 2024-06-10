@@ -30,46 +30,66 @@ namespace CatalogDb.API.Controllers
         [Route("CreateRole")]
         public async Task<IActionResult> CreateRole(string roleName)
         {
-            bool roleExists = await RoleManager.RoleExistsAsync(roleName);
-
-            if (!roleExists)
+            if (string.IsNullOrEmpty(roleName))
             {
-                IdentityResult roleResult = await RoleManager.CreateAsync(new IdentityRole(roleName));
-
-                if (roleResult.Succeeded)
-                {
-                    return Ok(new ResponseDTO("Success", $"Role '{roleName}' added successfully!"));
-                }
-                else
-                {
-                    return BadRequest(new ResponseDTO("Error", $"Failed to add the new role '{roleName}'!"));
-                }
+                return BadRequest(new ResponseDTO("Error", "Role cannot be null or empty!"));
             }
 
-            return Conflict(new ResponseDTO("Error", $"Role '{roleName}' already exists!"));
+            bool roleExists = await RoleManager.RoleExistsAsync(roleName);
+
+            if (roleExists)
+            {
+                return Conflict(new ResponseDTO("Error", $"Role '{roleName}' already exists!"));
+            }
+
+            IdentityResult roleResult = await RoleManager.CreateAsync(new IdentityRole(roleName));
+
+            if (roleResult.Succeeded)
+            {
+                return Ok(new ResponseDTO("Success", $"Role '{roleName}' added successfully!"));
+            }
+
+            return StatusCode(StatusCodes.Status500InternalServerError, new ResponseDTO("Error", $"Failed to add the new role '{roleName}'!"));
         }
 
         [HttpPost]
         [Route("AddUserToRole")]
         public async Task<IActionResult> AddUserToRole(string email, string roleName)
         {
-            ApplicationUser? userExists = await UserManager.FindByEmailAsync(email);
-
-            if (userExists != null)
+            if (string.IsNullOrEmpty(email))
             {
-                IdentityResult result = await UserManager.AddToRoleAsync(userExists, roleName);
-
-                if (result.Succeeded)
-                {
-                    return Ok(new ResponseDTO("Success", $"User '{userExists.Email}' added to the '{roleName}' role!"));
-                }
-                else
-                {
-                    return Conflict(new ResponseDTO("Error", $"Failed to add user '{userExists.Email}' to the '{roleName}' role!"));
-                }
+                return BadRequest(new ResponseDTO("Error", "E-mail cannot be null or empty!"));
             }
 
-            return NotFound(new ResponseDTO("Error", "User not found!"));
+            ApplicationUser? userEmail = await UserManager.FindByEmailAsync(email);
+
+            if (userEmail == null)
+            {
+                return NotFound(new ResponseDTO("Error", "User e-mail not found!"));
+            }
+
+            bool roleExists = await RoleManager.RoleExistsAsync(roleName);
+
+            if (!roleExists)
+            {
+                return NotFound(new ResponseDTO("Error", $"Role '{roleName}' not found!"));
+            }
+
+            bool isUserInRole = await UserManager.IsInRoleAsync(userEmail, roleName);
+
+            if (isUserInRole)
+            {
+                return Conflict(new ResponseDTO("Error", $"User e-mail '{userEmail.Email}' is already in the '{roleName}' role!"));
+            }
+
+            IdentityResult result = await UserManager.AddToRoleAsync(userEmail, roleName);
+
+            if (result.Succeeded)
+            {
+                return Ok(new ResponseDTO("Success", $"User '{userEmail.Email}' added to the '{roleName}' role!"));
+            }
+
+            return StatusCode(StatusCodes.Status500InternalServerError, new ResponseDTO("Error", "Failed to add user to role. Please, try again later."));
         }
 
         [HttpPost]
@@ -78,69 +98,69 @@ namespace CatalogDb.API.Controllers
         {
             ApplicationUser? user = await UserManager.FindByNameAsync(loginDTO.UserName);
 
-            if (user != null && await UserManager.CheckPasswordAsync(user, loginDTO.Password))
+            if (user == null || !await UserManager.CheckPasswordAsync(user, loginDTO.Password))
             {
-                IList<string> userRoles = await UserManager.GetRolesAsync(user);
-
-                var authClaims = new List<Claim>
-                {
-                    new(ClaimTypes.Name, user.UserName!),
-                    new(ClaimTypes.Email, user.Email!),
-                    new(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString())
-                };
-
-                foreach (string userRole in userRoles)
-                {
-                    authClaims.Add(new Claim(ClaimTypes.Role, userRole));
-                }
-
-                JwtSecurityToken token = TokenService.GenerateAccessToken(authClaims, Config);
-
-                string refreshToken = TokenService.GenerateRefreshToken();
-                _ = int.TryParse(Config["JWT:RefreshTokenValidityInMinutes"], out int refreshTokenValidityInMinutes);
-
-                user.RefreshTokenExpiryTime = DateTime.UtcNow.AddMinutes(refreshTokenValidityInMinutes);
-                user.RefreshToken = refreshToken;
-
-                await UserManager.UpdateAsync(user);
-
-                return Ok(new
-                {
-                    Token = new JwtSecurityTokenHandler().WriteToken(token),
-                    RefreshToken = refreshToken,
-                    Expiry = token.ValidTo
-                });
+                return Unauthorized(new ResponseDTO("Error", "Invalid login credentials. Please check your username and password and try again."));
             }
 
-            return Unauthorized();
+            IList<string> userRoles = await UserManager.GetRolesAsync(user);
+
+            var authClaims = new List<Claim>
+            {
+                new(ClaimTypes.Name, user.UserName!),
+                new(ClaimTypes.Email, user.Email!),
+                new(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString())
+            };
+
+            foreach (string userRole in userRoles)
+            {
+                authClaims.Add(new Claim(ClaimTypes.Role, userRole));
+            }
+
+            JwtSecurityToken token = TokenService.GenerateAccessToken(authClaims, Config);
+
+            string refreshToken = TokenService.GenerateRefreshToken();
+            _ = int.TryParse(Config["JWT:RefreshTokenValidityInMinutes"], out int refreshTokenValidityInMinutes);
+
+            user.RefreshTokenExpiryTime = DateTime.UtcNow.AddMinutes(refreshTokenValidityInMinutes);
+            user.RefreshToken = refreshToken;
+
+            await UserManager.UpdateAsync(user);
+
+            return Ok(new
+            {
+                Token = new JwtSecurityTokenHandler().WriteToken(token),
+                RefreshToken = refreshToken,
+                Expiry = token.ValidTo
+            });
         }
 
         [HttpPost]
         [Route("Register")]
         public async Task<IActionResult> Register(RegisterDTO registerDTO)
         {
-            ApplicationUser? userExists = await UserManager.FindByNameAsync(registerDTO.UserName);
+            ApplicationUser? email = await UserManager.FindByEmailAsync(registerDTO.Email);
 
-            if (userExists != null)
+            if (email != null)
             {
-                return Conflict(new ResponseDTO("Error", "User already exists!"));
+                return Conflict(new ResponseDTO("Error", "E-mail is already in use!"));
             }
 
-            var user = new ApplicationUser()
+            var newUser = new ApplicationUser()
             {
                 Email = registerDTO.Email,
                 SecurityStamp = Guid.NewGuid().ToString(),
                 UserName = registerDTO.UserName
             };
 
-            IdentityResult createUserResult = await UserManager.CreateAsync(user, registerDTO.Password);
+            IdentityResult createUserResult = await UserManager.CreateAsync(newUser, registerDTO.Password);
 
-            if (!createUserResult.Succeeded)
+            if (createUserResult.Succeeded)
             {
-                return BadRequest(new ResponseDTO("Error", "Failed to create the user!"));
+                return Ok(new ResponseDTO("Success", "User created successfully!"));
             }
 
-            return Ok(new ResponseDTO("Success", "User created successfully!"));
+            return StatusCode(StatusCodes.Status500InternalServerError, new ResponseDTO("Error", "Failed to create the user!"));
         }
 
         [HttpPost]
@@ -159,15 +179,20 @@ namespace CatalogDb.API.Controllers
 
             if (principal == null)
             {
-                return Unauthorized("The provided access or refresh token is invalid or expired!");
+                return Unauthorized(new ResponseDTO("Error", "The provided access or refresh token is invalid or expired!"));
             }
 
-            string userName = principal.Identity.Name;
+            string? userName = principal.Identity?.Name;
+
+            if (string.IsNullOrEmpty(userName))
+            {
+                return BadRequest(new ResponseDTO("Error", "User name cannot be null or empty!"));
+            }
 
             ApplicationUser? user = await UserManager.FindByNameAsync(userName);
             if (user == null || user.RefreshToken != refreshToken || user.RefreshTokenExpiryTime <= DateTime.Now)
             {
-                return Unauthorized("The provided access or refresh token is invalid or expired!");
+                return Unauthorized(new ResponseDTO("Error", "The provided access or refresh token is invalid or expired!"));
             }
 
             JwtSecurityToken newAccessToken = TokenService.GenerateAccessToken(principal.Claims.ToList(), Config);
@@ -188,6 +213,11 @@ namespace CatalogDb.API.Controllers
         [Route("Revoke/{userName}")]
         public async Task<IActionResult> Revoke(string userName)
         {
+            if (string.IsNullOrEmpty(userName))
+            {
+                return BadRequest("User name cannot be null or empty!");
+            }
+
             ApplicationUser? user = await UserManager.FindByNameAsync(userName);
 
             if (user == null)

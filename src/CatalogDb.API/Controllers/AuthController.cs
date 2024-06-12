@@ -139,9 +139,9 @@ namespace CatalogDb.API.Controllers
         [Route("Register")]
         public async Task<IActionResult> Register(RegisterDTO registerDTO)
         {
-            ApplicationUser? email = await UserManager.FindByEmailAsync(registerDTO.Email);
+            ApplicationUser? existingUser = await UserManager.FindByEmailAsync(registerDTO.Email);
 
-            if (email != null)
+            if (existingUser != null)
             {
                 return Conflict(new ResponseDTO("Error", "E-mail is already in use!"));
             }

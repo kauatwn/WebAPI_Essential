@@ -17,14 +17,14 @@ namespace CatalogDb.API.Repositories
             IOrderedQueryable<Category> orderedCategories = GetAll()
                 .OrderBy(c => c.Id);
 
-            PagedList<Category> pagedCategoryList = await PagedList<Category>.ToPagedList(orderedCategories, filter.PageNumber, filter.PageSize);
+            var pagedCategories = await PagedList<Category>.ToPagedList(orderedCategories, filter.PageNumber, filter.PageSize);
 
-            if (pagedCategoryList.Count == 0)
+            if (pagedCategories.Count == 0)
             {
-                throw new InvalidOperationException("The list of products is empty");
+                throw new InvalidOperationException("The list of categories is empty");
             }
 
-            return pagedCategoryList;
+            return pagedCategories;
         }
 
         public async Task<PagedList<Category>> GetCategoriesFilteredByNameAsync(CategoryNameFilter filter)
@@ -33,9 +33,9 @@ namespace CatalogDb.API.Repositories
 
             IQueryable<Category> filteredCategories = filter.HandleFilter(categories);
 
-            var pagedCategory = await PagedList<Category>.ToPagedList(filteredCategories, filter.PageNumber, filter.PageSize);
+            var pagedCategories = await PagedList<Category>.ToPagedList(filteredCategories, filter.PageNumber, filter.PageSize);
 
-            return pagedCategory;
+            return pagedCategories;
         }
     }
 }

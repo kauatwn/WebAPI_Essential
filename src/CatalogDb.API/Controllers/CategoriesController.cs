@@ -2,6 +2,8 @@
 using CatalogDb.API.DTOs;
 using CatalogDb.API.Entities;
 using CatalogDb.API.Pagination;
+using CatalogDb.API.Pagination.Filters;
+using CatalogDb.API.Pagination.Filters.Categories;
 using CatalogDb.API.Repositories;
 using Microsoft.AspNetCore.Mvc;
 using Newtonsoft.Json;
@@ -22,7 +24,7 @@ namespace CatalogDb.API.Controllers
         }
 
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<CategoryDTO>>> GetCategoryById([FromQuery] CategoryQueryParameters query)
+        public async Task<ActionResult<IEnumerable<CategoryDTO>>> GetCategoryById([FromQuery] BaseFilter<Category> query)
         {
             PagedList<Category> categories = await UnitOfWork.CategoryRepository.GetPagedCategoriesAsync(query);
 
@@ -44,7 +46,7 @@ namespace CatalogDb.API.Controllers
             return Ok(categoryDto);
         }
 
-        [HttpGet("filtered-by-name")]
+        [HttpGet("FilteredByName")]
         public async Task<ActionResult<IEnumerable<CategoryDTO>>> GetCategoriesFilteredByName([FromQuery] CategoryNameFilter filter)
         {
             PagedList<Category> categories = await UnitOfWork.CategoryRepository.GetCategoriesFilteredByNameAsync(filter);

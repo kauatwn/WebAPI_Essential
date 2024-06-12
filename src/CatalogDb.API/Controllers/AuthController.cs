@@ -49,7 +49,7 @@ namespace CatalogDb.API.Controllers
                 return Ok(new ResponseDTO("Success", $"Role '{roleName}' added successfully!"));
             }
 
-            return StatusCode(StatusCodes.Status500InternalServerError, new ResponseDTO("Error", $"Failed to add the new role '{roleName}'!"));
+            return StatusCode(StatusCodes.Status500InternalServerError, new ResponseDTO("Error", "Failed to create a role. Please, try again later."));
         }
 
         [HttpPost]
@@ -160,7 +160,7 @@ namespace CatalogDb.API.Controllers
                 return Ok(new ResponseDTO("Success", "User created successfully!"));
             }
 
-            return StatusCode(StatusCodes.Status500InternalServerError, new ResponseDTO("Error", "Failed to create the user!"));
+            return StatusCode(StatusCodes.Status500InternalServerError, new ResponseDTO("Error", "Failed to create the user. Please, try again later."));
         }
 
         [HttpPost]

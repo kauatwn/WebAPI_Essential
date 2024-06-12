@@ -1,7 +1,8 @@
 ﻿using CatalogDb.API.Context;
 using CatalogDb.API.Entities;
 using CatalogDb.API.Pagination;
-using Microsoft.EntityFrameworkCore;
+using CatalogDb.API.Pagination.Filters;
+using CatalogDb.API.Pagination.Filters.Categories;
 
 namespace CatalogDb.API.Repositories
 {
@@ -11,15 +12,16 @@ namespace CatalogDb.API.Repositories
         {
         }
 
-        public async Task<PagedList<Category>> GetPagedCategoriesAsync(CategoryQueryParameters query)
+        public async Task<PagedList<Category>> GetPagedCategoriesAsync(BaseFilter<Category> filter)
         {
-            IOrderedQueryable<Category> orderedCategories = GetAll().OrderBy(c => c.Id);
+            IOrderedQueryable<Category> orderedCategories = GetAll()
+                .OrderBy(c => c.Id);
 
-            PagedList<Category> pagedCategoryList = await PagedList<Category>.ToPagedList(orderedCategories, query.PageNumber, query.PageSize);
+            PagedList<Category> pagedCategoryList = await PagedList<Category>.ToPagedList(orderedCategories, filter.PageNumber, filter.PageSize);
 
             if (pagedCategoryList.Count == 0)
             {
-                throw new InvalidOperationException("List of categories not found.");
+                throw new InvalidOperationException("The list of products is empty");
             }
 
             return pagedCategoryList;
@@ -29,28 +31,11 @@ namespace CatalogDb.API.Repositories
         {
             IQueryable<Category> categories = GetAll();
 
-            if (!string.IsNullOrEmpty(filter.Name))
-            {
-                categories = categories.Where(c => c.Name.Contains(filter.Name));
-            }
+            IQueryable<Category> filteredCategories = filter.HandleFilter(categories);
 
-            PagedList<Category> pagedCategoryWithProductsList = await PagedList<Category>.ToPagedList(categories, filter.PageNumber, filter.PageSize);
+            var pagedCategory = await PagedList<Category>.ToPagedList(filteredCategories, filter.PageNumber, filter.PageSize);
 
-            return pagedCategoryWithProductsList;
-        }
-
-        public async Task<PagedList<Category>> GetCategoriesWithProductsAsync(CategoryQueryParameters query)
-        {
-            IQueryable<Category> categoriesWithProducts = Context.Categories.Include(c => c.Products);
-
-            PagedList<Category> pagedCategoriesWithProducts = await PagedList<Category>.ToPagedList(categoriesWithProducts, query.PageNumber, query.PageSize);
-
-            if (pagedCategoriesWithProducts.Count == 0)
-            {
-                throw new InvalidOperationException("List of categories with products not found.");
-            }
-
-            return pagedCategoriesWithProducts;
+            return pagedCategory;
         }
     }
 }

@@ -15,7 +15,7 @@ namespace CatalogDb.API.Repositories
         public async Task<PagedList<Category>> GetPagedCategoriesAsync(BaseFilter<Category> filter)
         {
             IOrderedQueryable<Category> orderedCategories = GetAll()
-                .OrderBy(c => c.Id);
+                                                           .OrderBy(c => c.Id);
 
             var pagedCategories = await PagedList<Category>.ToPagedList(orderedCategories, filter.PageNumber, filter.PageSize);
 
@@ -29,9 +29,10 @@ namespace CatalogDb.API.Repositories
 
         public async Task<PagedList<Category>> GetCategoriesFilteredByNameAsync(CategoryNameFilter filter)
         {
-            IQueryable<Category> categories = GetAll();
+            IOrderedQueryable<Category> orderedCategories = GetAll()
+                                                           .OrderBy(c => c.Id);
 
-            IQueryable<Category> filteredCategories = filter.HandleFilter(categories);
+            IQueryable<Category> filteredCategories = filter.HandleFilter(orderedCategories);
 
             var pagedCategories = await PagedList<Category>.ToPagedList(filteredCategories, filter.PageNumber, filter.PageSize);
 

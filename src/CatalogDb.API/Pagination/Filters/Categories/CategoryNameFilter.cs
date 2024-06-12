@@ -8,12 +8,12 @@ namespace CatalogDb.API.Pagination.Filters.Categories
 
         public override IQueryable<Category> HandleFilter(IQueryable<Category> filter)
         {
-            if (!string.IsNullOrEmpty(Name))
+            if (string.IsNullOrEmpty(Name))
             {
-                filter = filter.Where(c => c.Name.Contains(Name));
+                return filter;
             }
 
-            return filter;
+            return filter.Where(c => c.Name.Contains(Name));
         }
     }
 }

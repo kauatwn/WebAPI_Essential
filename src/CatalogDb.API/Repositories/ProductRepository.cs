@@ -1,6 +1,8 @@
 ﻿using CatalogDb.API.Context;
 using CatalogDb.API.Entities;
 using CatalogDb.API.Pagination;
+using CatalogDb.API.Pagination.Filters;
+using CatalogDb.API.Pagination.Filters.Products;
 
 namespace CatalogDb.API.Repositories
 {
@@ -10,43 +12,35 @@ namespace CatalogDb.API.Repositories
         {
         }
 
-        public async Task<PagedList<Product>> GetPagedProductsAsync(ProductQueryParameters productQuery)
+        public async Task<PagedList<Product>> GetPagedProductsAsync(BaseFilter<Product> filter)
         {
-            IOrderedQueryable<Product> orderedProducts = GetAll().OrderBy(p => p.Id);
+            IOrderedQueryable<Product> orderedProducts = GetAll()
+                .OrderBy(p => p.Id);
 
-            PagedList<Product> pagedProducts = await PagedList<Product>.ToPagedList(orderedProducts, productQuery.PageNumber, productQuery.PageSize);
+            var pagedProducts = await PagedList<Product>.ToPagedList(orderedProducts, filter.PageNumber, filter.PageSize);
 
             if (pagedProducts.Count == 0)
             {
-                throw new InvalidOperationException("List of products not found.");
+                throw new InvalidOperationException("The list of products is empty");
             }
 
             return pagedProducts;
         }
 
-        public async Task<PagedList<Product>> GetProductsFilteredByPriceAsync(ProductPriceFilter filter)
+        public async Task<PagedList<Product>> GetProductsFilteredByExactPrice(ProductExactPriceFilter filter)
         {
             IQueryable<Product> products = GetAll();
 
-            if (filter.Price.HasValue && !string.IsNullOrEmpty(filter.PriceCriterion))
+            IQueryable<Product> filteredProducts = filter.HandleFilter(products);
+
+            var pagedProducts = await PagedList<Product>.ToPagedList(filteredProducts, filter.PageNumber, filter.PageSize);
+
+            if (pagedProducts.Count == 0)
             {
-                if (filter.PriceCriterion.Equals("greater", StringComparison.OrdinalIgnoreCase))
-                {
-                    products = products.Where(p => p.Price > filter.Price.Value).OrderBy(p => p.Price);
-                }
-                else if (filter.PriceCriterion.Equals("less", StringComparison.OrdinalIgnoreCase))
-                {
-                    products = products.Where(p => p.Price < filter.Price.Value).OrderBy(p => p.Price);
-                }
-                else if (filter.PriceCriterion.Equals("equal", StringComparison.OrdinalIgnoreCase))
-                {
-                    products = products.Where(p => p.Price == filter.Price.Value).OrderBy(p => p.Price);
-                }
+                throw new InvalidOperationException($"It does not exist products with the price ${filter.Price}");
             }
 
-            PagedList<Product> filteredProducts = await PagedList<Product>.ToPagedList(products.AsQueryable(), filter.PageNumber, filter.PageSize);
-
-            return filteredProducts;
+            return pagedProducts;
         }
     }
 }

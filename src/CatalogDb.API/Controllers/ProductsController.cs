@@ -55,9 +55,17 @@ namespace CatalogDb.API.Controllers
         }
 
         [HttpGet("FilteredByPriceCriterion")]
-        public async Task<ActionResult<IEnumerable<ProductDTO>>> GetProductsFilteredByCriterion([FromQuery] ProductPriceCriterionFilter filter)
+        public async Task<ActionResult<IEnumerable<ProductDTO>>> GetProductsFilteredByPriceCriterion([FromQuery] ProductPriceCriterionFilter filter)
         {
             PagedList<Product> products = await UnitOfWork.ProductRepository.GetProductsFilteredByPriceCriterion(filter);
+
+            return GenerateResponse(products);
+        }
+
+        [HttpGet("FilteredByPriceAndPriceCriterion")]
+        public async Task<ActionResult<IEnumerable<ProductDTO>>> GetProductsFilteredByPriceAndPriceCriterion([FromQuery] ProductPriceAndPriceCriterionFilter filter)
+        {
+            PagedList<Product> products = await UnitOfWork.ProductRepository.GetProductsFilteredByPriceAndPriceCriterion(filter);
 
             return GenerateResponse(products);
         }

@@ -54,6 +54,14 @@ namespace CatalogDb.API.Controllers
             return GenerateResponse(products);
         }
 
+        [HttpGet("FilteredByPriceCriterion")]
+        public async Task<ActionResult<IEnumerable<ProductDTO>>> GetProductsFilteredByCriterion([FromQuery] ProductPriceCriterionFilter filter)
+        {
+            PagedList<Product> products = await UnitOfWork.ProductRepository.GetProductsFilteredByPriceCriterion(filter);
+
+            return GenerateResponse(products);
+        }
+
         [HttpPost]
         public async Task<ActionResult<ProductDTO>> Post(ProductDTO productDto)
         {

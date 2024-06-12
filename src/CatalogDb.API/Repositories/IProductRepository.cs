@@ -9,5 +9,6 @@ namespace CatalogDb.API.Repositories
     {
         Task<PagedList<Product>> GetPagedProductsAsync(BaseFilter<Product> filter);
         Task<PagedList<Product>> GetProductsFilteredByExactPrice(ProductExactPriceFilter filter);
+        Task<PagedList<Product>> GetProductsFilteredByPriceCriterion(ProductPriceCriterionFilter filter);
     }
 }

@@ -10,11 +10,11 @@ namespace CatalogDb.API.Entities
 
         [Required]
         [StringLength(80)]
-        public string? Name { get; set; }
+        public string Name { get; set; } = string.Empty;
 
         [Required]
         [StringLength(200)]
-        public string? Description { get; set; }
+        public string Description { get; set; } = string.Empty;
 
         [Required]
         [Column(TypeName = "decimal(10,2)")]
@@ -24,7 +24,7 @@ namespace CatalogDb.API.Entities
         public string? ImageUrl { get; set; }
 
         public float Stock { get; set; }
-        public DateTime RegistrationDate { get; set; }
+        public DateTime RegistrationDate { get; set; } = DateTime.UtcNow;
 
         [ForeignKey(nameof(Category.Id))]
         public int CategoryId { get; set; }

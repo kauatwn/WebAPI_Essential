@@ -2,6 +2,8 @@
 using CatalogDb.API.DTOs;
 using CatalogDb.API.Entities;
 using CatalogDb.API.Pagination;
+using CatalogDb.API.Pagination.Filters;
+using CatalogDb.API.Pagination.Filters.Products;
 using CatalogDb.API.Repositories;
 using Microsoft.AspNetCore.Mvc;
 using Newtonsoft.Json;
@@ -22,9 +24,9 @@ namespace CatalogDb.API.Controllers
         }
 
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<ProductDTO>>> Get([FromQuery] ProductQueryParameters productQuery)
+        public async Task<ActionResult<IEnumerable<ProductDTO>>> Get([FromQuery] BaseFilter<Product> filter)
         {
-            PagedList<Product> products = await UnitOfWork.ProductRepository.GetPagedProductsAsync(productQuery);
+            PagedList<Product> products = await UnitOfWork.ProductRepository.GetPagedProductsAsync(filter);
 
             return GenerateResponse(products);
         }
@@ -44,10 +46,10 @@ namespace CatalogDb.API.Controllers
             return Ok(productDto);
         }
 
-        [HttpGet("filtered-by-price")]
-        public async Task<ActionResult<IEnumerable<ProductDTO>>> GetProductsFilteredByPrice([FromQuery] ProductPriceFilter filter)
+        [HttpGet("FilteredByExactPrice")]
+        public async Task<ActionResult<IEnumerable<ProductDTO>>> GetProductsFilteredByPrice([FromQuery] ProductExactPriceFilter filter)
         {
-            PagedList<Product> products = await UnitOfWork.ProductRepository.GetProductsFilteredByPriceAsync(filter);
+            PagedList<Product> products = await UnitOfWork.ProductRepository.GetProductsFilteredByExactPrice(filter);
 
             return GenerateResponse(products);
         }

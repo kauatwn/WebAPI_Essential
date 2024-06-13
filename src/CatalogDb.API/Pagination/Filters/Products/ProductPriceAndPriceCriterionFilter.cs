@@ -16,14 +16,14 @@ namespace CatalogDb.API.Pagination.Filters.Products
 
             if (PriceCriterion.Equals("greater", StringComparison.OrdinalIgnoreCase))
             {
-                filter = filter.Where(p => p.Price >= Price.Value)
+                filter = filter.Where(p => p.Price > Price.Value)
                                .OrderByDescending(p => p.Price)
                                .ThenBy(p => p.Id);
             }
 
             if (PriceCriterion.Equals("less", StringComparison.OrdinalIgnoreCase))
             {
-                filter = filter.Where(p => p.Price <= Price.Value)
+                filter = filter.Where(p => p.Price < Price.Value)
                                .OrderBy(p => p.Price)
                                .ThenBy(p => p.Id);
             }

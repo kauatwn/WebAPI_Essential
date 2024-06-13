@@ -24,8 +24,11 @@ namespace CatalogDb.API.UnitTests.Pagination.Filters.Products
             IQueryable<Product> filteredProducts = filter.HandleFilter(products);
 
             // Assert
-            filteredProducts.Should().HaveCount(2);
-            filteredProducts.Should().OnlyContain(p => p.Price == filter.Price.Value);
+            filteredProducts.Should()
+                            .HaveCount(2);
+
+            filteredProducts.Should()
+                            .OnlyContain(p => p.Price == filter.Price.Value);
         }
 
         [Fact]
@@ -45,7 +48,8 @@ namespace CatalogDb.API.UnitTests.Pagination.Filters.Products
             // Act
             IQueryable<Product> filteredProducts = filter.HandleFilter(products);
 
-            filteredProducts.Should().HaveCount(4);
+            filteredProducts.Should()
+                            .Equal(products);
         }
 
         [Fact]
@@ -66,7 +70,8 @@ namespace CatalogDb.API.UnitTests.Pagination.Filters.Products
             IQueryable<Product> filteredProducts = filter.HandleFilter(products);
 
             // Assert
-            filteredProducts.Should().BeEmpty();
+            filteredProducts.Should()
+                            .BeEmpty();
         }
     }
 }

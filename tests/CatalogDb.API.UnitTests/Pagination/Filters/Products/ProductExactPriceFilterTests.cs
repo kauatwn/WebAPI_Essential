@@ -7,7 +7,7 @@ namespace CatalogDb.API.UnitTests.Pagination.Filters.Products
     public class ProductExactPriceFilterTests
     {
         [Fact]
-        public void HandleFilter_ByExactPrice_ReturnsQueryFilteredProductsWhenMatching()
+        public void HandleFilter_WhenPriceMatches_ReturnsFilteredProducts()
         {
             // Arrange
             IQueryable<Product> products = new List<Product>
@@ -29,7 +29,27 @@ namespace CatalogDb.API.UnitTests.Pagination.Filters.Products
         }
 
         [Fact]
-        public void HandleFilter_ByExactPrice_ReturnsEmptyQueryWhenNoMatching()
+        public void HandleFilter_WhenPriceNotSpecified_ReturnsAllProducts()
+        {
+            // Arrange
+            IQueryable<Product> products = new List<Product>
+            {
+                new() { Id = 1, Price = 10.0m },
+                new() { Id = 2, Price = 15.0m },
+                new() { Id = 3, Price = 10.0m },
+                new() { Id = 4, Price = 20.0m }
+            }.AsQueryable();
+
+            var filter = new ProductExactPriceFilter { Price = null };
+
+            // Act
+            IQueryable<Product> filteredProducts = filter.HandleFilter(products);
+
+            filteredProducts.Should().HaveCount(4);
+        }
+
+        [Fact]
+        public void HandleFilter_WhenPriceNoMatches_ReturnsEmptyQuery()
         {
             // Arrange
             IQueryable<Product> products = new List<Product>

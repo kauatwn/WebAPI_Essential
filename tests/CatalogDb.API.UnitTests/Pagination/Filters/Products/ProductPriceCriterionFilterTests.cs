@@ -54,5 +54,33 @@ namespace CatalogDb.API.UnitTests.Pagination.Filters.Products
             filteredProducts.Should()
                             .Equal(products);
         }
+
+        [Fact]
+        public void HandleFilter_WhenListIsEmpty_ReturnsEmptyQuery()
+        {
+            // Arrange
+            IQueryable<Product> products = new List<Product>().AsQueryable();
+
+            var filter = new ProductPriceCriterionFilter { PriceCriterion = null };
+
+            // Act
+            IQueryable<Product> filteredProductsWithoutSpecifiedCriterion = filter.HandleFilter(products);
+
+            filter.PriceCriterion = "greater";
+            IQueryable<Product> filteredProductsGreater = filter.HandleFilter(products);
+
+            filter.PriceCriterion = "less";
+            IQueryable<Product> filteredProductsLess = filter.HandleFilter(products);
+
+            // Assert
+            filteredProductsWithoutSpecifiedCriterion.Should()
+                                                     .BeEmpty();
+
+            filteredProductsGreater.Should()
+                                   .BeEmpty();
+
+            filteredProductsLess.Should()
+                                .BeEmpty();
+        }
     }
 }

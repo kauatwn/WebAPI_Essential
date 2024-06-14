@@ -34,7 +34,7 @@ namespace CatalogDb.API.Controllers
         [HttpGet("{id:int}", Name = nameof(GetCategoryById))]
         public async Task<ActionResult<CategoryDTO>> GetCategoryById(int id)
         {
-            Category? category = await UnitOfWork.Repository.GetAsync(c => c.Id == id);
+            Category? category = await UnitOfWork.Repository.GetByIdAsync(c => c.Id == id);
 
             if (category == null)
             {
@@ -46,7 +46,7 @@ namespace CatalogDb.API.Controllers
             return Ok(categoryDto);
         }
 
-        [HttpGet("FilteredByName")]
+        [HttpGet("Filter/CategoryNameFilter")]
         public async Task<ActionResult<IEnumerable<CategoryDTO>>> GetCategoriesFilteredByName([FromQuery] CategoryNameFilter filter)
         {
             PagedList<Category> categories = await UnitOfWork.CategoryRepository.GetCategoriesFilteredByNameAsync(filter);
@@ -93,7 +93,7 @@ namespace CatalogDb.API.Controllers
         [HttpDelete("{id:int}")]
         public async Task<ActionResult<CategoryDTO>> Delete(int id)
         {
-            Category? category = await UnitOfWork.Repository.GetAsync(c => c.Id == id);
+            Category? category = await UnitOfWork.Repository.GetByIdAsync(c => c.Id == id);
 
             if (category == null)
             {

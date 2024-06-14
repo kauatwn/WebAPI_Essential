@@ -34,7 +34,7 @@ namespace CatalogDb.API.Controllers
         [HttpGet("{id:int}", Name = nameof(GetProductById))]
         public async Task<ActionResult<ProductDTO>> GetProductById(int id)
         {
-            Product? product = await UnitOfWork.Repository.GetAsync(p => p.Id == id);
+            Product? product = await UnitOfWork.Repository.GetByIdAsync(p => p.Id == id);
 
             if (product == null)
             {
@@ -46,26 +46,26 @@ namespace CatalogDb.API.Controllers
             return Ok(productDto);
         }
 
-        [HttpGet("FilteredByExactPrice")]
-        public async Task<ActionResult<IEnumerable<ProductDTO>>> GetProductsFilteredByPrice([FromQuery] ProductExactPriceFilter filter)
+        [HttpGet("Filter/ProductExactPriceFilter")]
+        public async Task<ActionResult<IEnumerable<ProductDTO>>> GetProductsFilteredByExactPrice([FromQuery] ProductExactPriceFilter filter)
         {
-            PagedList<Product> products = await UnitOfWork.ProductRepository.GetProductsFilteredByExactPrice(filter);
+            PagedList<Product> products = await UnitOfWork.ProductRepository.GetProductsFilteredByExactPriceAsync(filter);
 
             return GenerateResponse(products);
         }
 
-        [HttpGet("FilteredByPriceCriterion")]
+        [HttpGet("Filter/ProductPriceCriterionFilter")]
         public async Task<ActionResult<IEnumerable<ProductDTO>>> GetProductsFilteredByPriceCriterion([FromQuery] ProductPriceCriterionFilter filter)
         {
-            PagedList<Product> products = await UnitOfWork.ProductRepository.GetProductsFilteredByPriceCriterion(filter);
+            PagedList<Product> products = await UnitOfWork.ProductRepository.GetProductsFilteredByPriceCriterionAsync(filter);
 
             return GenerateResponse(products);
         }
 
-        [HttpGet("FilteredByPriceAndPriceCriterion")]
-        public async Task<ActionResult<IEnumerable<ProductDTO>>> GetProductsFilteredByPriceAndPriceCriterion([FromQuery] ProductPriceAndPriceCriterionFilter filter)
+        [HttpGet("Filter/ProductPriceWithCriterionFilter")]
+        public async Task<ActionResult<IEnumerable<ProductDTO>>> GetProductsFilteredByPriceWithCriterion([FromQuery] ProductPriceWithCriterionFilter filter)
         {
-            PagedList<Product> products = await UnitOfWork.ProductRepository.GetProductsFilteredByPriceAndPriceCriterion(filter);
+            PagedList<Product> products = await UnitOfWork.ProductRepository.GetProductsFilteredByPriceWithCriterionAsync(filter);
 
             return GenerateResponse(products);
         }
@@ -109,7 +109,7 @@ namespace CatalogDb.API.Controllers
         [HttpDelete("{id:int}")]
         public async Task<ActionResult<ProductDTO>> Delete(int id)
         {
-            Product? product = await UnitOfWork.Repository.GetAsync(p => p.Id == id);
+            Product? product = await UnitOfWork.Repository.GetByIdAsync(p => p.Id == id);
 
             if (product == null)
             {

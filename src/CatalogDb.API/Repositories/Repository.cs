@@ -18,7 +18,7 @@ namespace CatalogDb.API.Repositories
             return Context.Set<T>().AsNoTracking();
         }
 
-        public async Task<T?> GetAsync(Expression<Func<T, bool>> predicate)
+        public async Task<T?> GetByIdAsync(Expression<Func<T, bool>> predicate)
         {
             return await Context.Set<T>().AsNoTracking().FirstOrDefaultAsync(predicate);
         }

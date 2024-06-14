@@ -8,8 +8,8 @@ namespace CatalogDb.API.Repositories
     public interface IProductRepository : IRepository<Product>
     {
         Task<PagedList<Product>> GetPagedProductsAsync(BaseFilter<Product> filter);
-        Task<PagedList<Product>> GetProductsFilteredByExactPrice(ProductExactPriceFilter filter);
-        Task<PagedList<Product>> GetProductsFilteredByPriceCriterion(ProductPriceCriterionFilter filter);
-        Task<PagedList<Product>> GetProductsFilteredByPriceAndPriceCriterion(ProductPriceAndPriceCriterionFilter filter);
+        Task<PagedList<Product>> GetProductsFilteredByExactPriceAsync(ProductExactPriceFilter filter);
+        Task<PagedList<Product>> GetProductsFilteredByPriceCriterionAsync(ProductPriceCriterionFilter filter);
+        Task<PagedList<Product>> GetProductsFilteredByPriceWithCriterionAsync(ProductPriceWithCriterionFilter filter);
     }
 }

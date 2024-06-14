@@ -14,10 +14,9 @@ namespace CatalogDb.API.Repositories
 
         public async Task<PagedList<Product>> GetPagedProductsAsync(BaseFilter<Product> filter)
         {
-            IOrderedQueryable<Product> orderedProducts = GetAll()
-                                                        .OrderBy(p => p.Id);
+            IOrderedQueryable<Product> orderedProducts = GetAll().OrderBy(p => p.Id);
 
-            var pagedProducts = await PagedList<Product>.ToPagedList(orderedProducts, filter.PageNumber, filter.PageSize);
+            var pagedProducts = await PagedList<Product>.ToPagedListAsync(orderedProducts, filter.PageNumber, filter.PageSize);
 
             if (pagedProducts.Count == 0)
             {
@@ -27,14 +26,13 @@ namespace CatalogDb.API.Repositories
             return pagedProducts;
         }
 
-        public async Task<PagedList<Product>> GetProductsFilteredByExactPrice(ProductExactPriceFilter filter)
+        public async Task<PagedList<Product>> GetProductsFilteredByExactPriceAsync(ProductExactPriceFilter filter)
         {
-            IOrderedQueryable<Product> orderedProducts = GetAll()
-                                                        .OrderBy(p => p.Id);
+            IOrderedQueryable<Product> orderedProducts = GetAll().OrderBy(p => p.Id);
 
             IQueryable<Product> filteredProducts = filter.HandleFilter(orderedProducts);
 
-            var pagedProducts = await PagedList<Product>.ToPagedList(filteredProducts, filter.PageNumber, filter.PageSize);
+            var pagedProducts = await PagedList<Product>.ToPagedListAsync(filteredProducts, filter.PageNumber, filter.PageSize);
 
             if (pagedProducts.Count == 0)
             {
@@ -44,14 +42,13 @@ namespace CatalogDb.API.Repositories
             return pagedProducts;
         }
 
-        public async Task<PagedList<Product>> GetProductsFilteredByPriceCriterion(ProductPriceCriterionFilter filter)
+        public async Task<PagedList<Product>> GetProductsFilteredByPriceCriterionAsync(ProductPriceCriterionFilter filter)
         {
-            IOrderedQueryable<Product> orderedProducts = GetAll()
-                                                        .OrderBy(p => p.Id);
+            IOrderedQueryable<Product> orderedProducts = GetAll().OrderBy(p => p.Id);
 
             IQueryable<Product> filteredProducts = filter.HandleFilter(orderedProducts);
 
-            var pagedProducts = await PagedList<Product>.ToPagedList(filteredProducts, filter.PageNumber, filter.PageSize);
+            var pagedProducts = await PagedList<Product>.ToPagedListAsync(filteredProducts, filter.PageNumber, filter.PageSize);
 
             if (pagedProducts.Count == 0)
             {
@@ -61,14 +58,13 @@ namespace CatalogDb.API.Repositories
             return pagedProducts;
         }
 
-        public async Task<PagedList<Product>> GetProductsFilteredByPriceAndPriceCriterion(ProductPriceAndPriceCriterionFilter filter)
+        public async Task<PagedList<Product>> GetProductsFilteredByPriceWithCriterionAsync(ProductPriceWithCriterionFilter filter)
         {
-            IOrderedQueryable<Product> orderedProducts = GetAll()
-                                                        .OrderBy(p => p.Id);
+            IOrderedQueryable<Product> orderedProducts = GetAll().OrderBy(p => p.Id);
 
             IQueryable<Product> filteredProducts = filter.HandleFilter(orderedProducts);
 
-            var pagedProducts = await PagedList<Product>.ToPagedList(filteredProducts, filter.PageNumber, filter.PageSize);
+            var pagedProducts = await PagedList<Product>.ToPagedListAsync(filteredProducts, filter.PageNumber, filter.PageSize);
 
             if (pagedProducts.Count == 0)
             {

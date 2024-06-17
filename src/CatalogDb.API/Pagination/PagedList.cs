@@ -22,7 +22,7 @@ namespace CatalogDb.API.Pagination
             AddRange(items);
         }
 
-        public static async Task<PagedList<T>> ToPagedList(IQueryable<T> source, int pageNumber, int pageSize)
+        public static async Task<PagedList<T>> ToPagedListAsync(IQueryable<T> source, int pageNumber, int pageSize)
         {
             int count = await source.CountAsync();
             List<T> items = await source.Skip((pageNumber - 1) * pageSize).Take(pageSize).ToListAsync();

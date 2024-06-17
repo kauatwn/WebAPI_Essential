@@ -7,7 +7,7 @@ namespace CatalogDb.API.UnitTests.Pagination.Filters.Products
     public class ProductPriceCriterionFilterTests
     {
         [Fact]
-        public void HandleFilter_WhenPriceCriterionIsSpecified_ReturnsFilteredProducts()
+        public void HandleFilter_WithCriterion_ReturnsFilteredQuery()
         {
             // Arrange
             IQueryable<Product> products = new List<Product>
@@ -18,23 +18,25 @@ namespace CatalogDb.API.UnitTests.Pagination.Filters.Products
                 new() { Id = 4, Price = 20.0m }
             }.AsQueryable();
 
-            // Act
-            var filter = new ProductPriceCriterionFilter { PriceCriterion = "greater" };
-            IQueryable<Product> filteredProductsGreater = filter.HandleFilter(products);
+            var filterGreater = new ProductPriceCriterionFilter { Criterion = "greater" };
+            var filterLess = new ProductPriceCriterionFilter { Criterion = "less" };
 
-            filter.PriceCriterion = "less";
-            IQueryable<Product> filteredProductsLess = filter.HandleFilter(products);
+            // Act
+            IQueryable<Product> filteredQueryGreater = filterGreater.HandleFilter(products);
+            IQueryable<Product> filteredQueryLess = filterLess.HandleFilter(products);
 
             // Assert
-            filteredProductsGreater.Should()
-                                   .BeInDescendingOrder(p => p.Price);
+            filteredQueryGreater.Should().NotBeEmpty();
+            filteredQueryGreater.Should().BeInDescendingOrder(p => p.Price);
+            filteredQueryGreater.Should().HaveCount(products.Count());
 
-            filteredProductsLess.Should()
-                                .BeInAscendingOrder(p => p.Price);
+            filteredQueryLess.Should().NotBeEmpty();
+            filteredQueryLess.Should().BeInAscendingOrder(p => p.Price);
+            filteredQueryLess.Should().HaveCount(products.Count());
         }
 
         [Fact]
-        public void HandleFilter_WhenPriceCriterionIsNotSpecified_ReturnsAllProducts()
+        public void HandleFilter_WithoutCriterion_ReturnsUnfilteredQuery()
         {
             // Arrange
             IQueryable<Product> products = new List<Product>
@@ -45,42 +47,34 @@ namespace CatalogDb.API.UnitTests.Pagination.Filters.Products
                 new() { Id = 4, Price = 20.0m }
             }.AsQueryable();
 
-            var filter = new ProductPriceCriterionFilter { PriceCriterion = null };
+            var filter = new ProductPriceCriterionFilter { Criterion = null };
 
             // Act
-            IQueryable<Product> filteredProducts = filter.HandleFilter(products);
+            IQueryable<Product> filteredQuery = filter.HandleFilter(products);
 
             // Assert
-            filteredProducts.Should()
-                            .Equal(products);
+            filteredQuery.Should().Equal(products);
         }
 
         [Fact]
-        public void HandleFilter_WhenListIsEmpty_ReturnsEmptyQuery()
+        public void HandleFilter_WithEmptyList_ReturnsEmptyQuery()
         {
             // Arrange
             IQueryable<Product> products = new List<Product>().AsQueryable();
 
-            var filter = new ProductPriceCriterionFilter { PriceCriterion = null };
+            var filterGreater = new ProductPriceCriterionFilter { Criterion = "greater" };
+            var filterLess = new ProductPriceCriterionFilter { Criterion = "less" };
+            var filterNull = new ProductPriceCriterionFilter { Criterion = null };
 
             // Act
-            IQueryable<Product> filteredProductsWithoutSpecifiedCriterion = filter.HandleFilter(products);
-
-            filter.PriceCriterion = "greater";
-            IQueryable<Product> filteredProductsGreater = filter.HandleFilter(products);
-
-            filter.PriceCriterion = "less";
-            IQueryable<Product> filteredProductsLess = filter.HandleFilter(products);
+            IQueryable<Product> filteredQueryGreater = filterGreater.HandleFilter(products);
+            IQueryable<Product> filteredQueryLess = filterLess.HandleFilter(products);
+            IQueryable<Product> filteredQueryNull = filterNull.HandleFilter(products);
 
             // Assert
-            filteredProductsWithoutSpecifiedCriterion.Should()
-                                                     .BeEmpty();
-
-            filteredProductsGreater.Should()
-                                   .BeEmpty();
-
-            filteredProductsLess.Should()
-                                .BeEmpty();
+            filteredQueryGreater.Should().BeEmpty();
+            filteredQueryLess.Should().BeEmpty();
+            filteredQueryNull.Should().BeEmpty();
         }
     }
 }

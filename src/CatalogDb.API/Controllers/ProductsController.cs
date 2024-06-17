@@ -24,9 +24,9 @@ namespace CatalogDb.API.Controllers
         }
 
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<ProductDTO>>> Get([FromQuery] BaseFilter<Product> filter)
+        public async Task<ActionResult<IEnumerable<ProductDTO>>> GetProducts([FromQuery] BaseFilter<Product> query)
         {
-            PagedList<Product> products = await UnitOfWork.ProductRepository.GetPagedProductsAsync(filter);
+            PagedList<Product> products = await UnitOfWork.ProductRepository.GetPagedProductsAsync(query.PageNumber, query.PageNumber);
 
             return GenerateResponse(products);
         }

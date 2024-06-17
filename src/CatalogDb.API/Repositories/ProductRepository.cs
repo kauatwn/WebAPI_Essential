@@ -1,7 +1,6 @@
 ﻿using CatalogDb.API.Context;
 using CatalogDb.API.Entities;
 using CatalogDb.API.Pagination;
-using CatalogDb.API.Pagination.Filters;
 using CatalogDb.API.Pagination.Filters.Products;
 
 namespace CatalogDb.API.Repositories
@@ -12,11 +11,11 @@ namespace CatalogDb.API.Repositories
         {
         }
 
-        public async Task<PagedList<Product>> GetPagedProductsAsync(BaseFilter<Product> filter)
+        public async Task<PagedList<Product>> GetPagedProductsAsync(int pageNumber, int pageSize)
         {
             IOrderedQueryable<Product> orderedProducts = GetAll().OrderBy(p => p.Id);
 
-            var pagedProducts = await PagedList<Product>.ToPagedListAsync(orderedProducts, filter.PageNumber, filter.PageSize);
+            var pagedProducts = await PagedList<Product>.ToPagedListAsync(orderedProducts, pageNumber, pageSize);
 
             if (pagedProducts.Count == 0)
             {

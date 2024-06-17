@@ -1,7 +1,6 @@
 ﻿using CatalogDb.API.Context;
 using CatalogDb.API.Entities;
 using CatalogDb.API.Pagination;
-using CatalogDb.API.Pagination.Filters;
 using CatalogDb.API.Pagination.Filters.Categories;
 
 namespace CatalogDb.API.Repositories
@@ -12,11 +11,11 @@ namespace CatalogDb.API.Repositories
         {
         }
 
-        public async Task<PagedList<Category>> GetPagedCategoriesAsync(BaseFilter<Category> filter)
+        public async Task<PagedList<Category>> GetPagedCategoriesAsync(int pageNumber, int pageSize)
         {
             IOrderedQueryable<Category> orderedCategories = GetAll().OrderBy(c => c.Id);
 
-            var pagedCategories = await PagedList<Category>.ToPagedListAsync(orderedCategories, filter.PageNumber, filter.PageSize);
+            var pagedCategories = await PagedList<Category>.ToPagedListAsync(orderedCategories, pageNumber, pageSize);
 
             if (pagedCategories.Count == 0)
             {

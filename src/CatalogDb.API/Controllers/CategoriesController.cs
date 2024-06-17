@@ -24,9 +24,9 @@ namespace CatalogDb.API.Controllers
         }
 
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<CategoryDTO>>> GetCategoryById([FromQuery] BaseFilter<Category> query)
+        public async Task<ActionResult<IEnumerable<CategoryDTO>>> GetCategories([FromQuery] BaseFilter<Category> query)
         {
-            PagedList<Category> categories = await UnitOfWork.CategoryRepository.GetPagedCategoriesAsync(query);
+            PagedList<Category> categories = await UnitOfWork.CategoryRepository.GetPagedCategoriesAsync(query.PageNumber, query.PageNumber);
 
             return GenerateResponse(categories);
         }

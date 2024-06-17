@@ -11,7 +11,7 @@ namespace CatalogDb.API.Pagination.Filters.Products
             if (Price.HasValue)
             {
                 filter = filter.Where(p => p.Price == Price.Value)
-                               .OrderBy(p => p.Id);
+                    .OrderBy(p => p.Id);
             }
 
             return filter;

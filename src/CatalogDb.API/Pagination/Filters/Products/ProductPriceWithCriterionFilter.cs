@@ -2,26 +2,29 @@
 
 namespace CatalogDb.API.Pagination.Filters.Products
 {
-    public sealed class ProductPriceCriterionFilter : BaseFilter<Product>
+    public sealed class ProductPriceWithCriterionFilter : BaseFilter<Product>
     {
+        public decimal? Price { get; set; }
         public string? Criterion { get; set; }
 
         public override IQueryable<Product> HandleFilter(IQueryable<Product> filter)
         {
-            if (string.IsNullOrEmpty(Criterion))
+            if (!Price.HasValue || string.IsNullOrEmpty(Criterion))
             {
                 return filter;
             }
 
             if (Criterion.Equals("greater", StringComparison.OrdinalIgnoreCase))
             {
-                filter = filter.OrderByDescending(p => p.Price)
+                filter = filter.Where(p => p.Price > Price.Value)
+                    .OrderByDescending(p => p.Price)
                     .ThenBy(p => p.Id);
             }
 
             if (Criterion.Equals("less", StringComparison.OrdinalIgnoreCase))
             {
-                filter = filter.OrderBy(p => p.Price)
+                filter = filter.Where(p => p.Price < Price.Value)
+                    .OrderBy(p => p.Price)
                     .ThenBy(p => p.Id);
             }
 

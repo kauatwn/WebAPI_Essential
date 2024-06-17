@@ -10,7 +10,7 @@ namespace CatalogDb.API.Pagination.Filters.Products
         {
             if (string.IsNullOrEmpty(Criterion))
             {
-                return filter;
+                return base.HandleFilter(filter);
             }
 
             if (Criterion.Equals("greater", StringComparison.OrdinalIgnoreCase))

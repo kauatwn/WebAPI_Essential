@@ -11,7 +11,7 @@ namespace CatalogDb.API.Pagination.Filters.Products
         {
             if (!Price.HasValue || string.IsNullOrEmpty(Criterion))
             {
-                return filter;
+                return base.HandleFilter(filter);
             }
 
             if (Criterion.Equals("greater", StringComparison.OrdinalIgnoreCase))

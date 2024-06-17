@@ -10,7 +10,7 @@ namespace CatalogDb.API.Pagination.Filters.Categories
         {
             if (string.IsNullOrEmpty(Name))
             {
-                return filter;
+                return base.HandleFilter(filter);
             }
 
             return filter.Where(c => c.Name.Contains(Name));

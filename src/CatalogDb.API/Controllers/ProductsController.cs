@@ -38,7 +38,7 @@ namespace CatalogDb.API.Controllers
 
             if (product == null)
             {
-                return NotFound();
+                return NotFound($"No product found with the ID {id}");
             }
 
             ProductDTO productDto = Mapper.Map<ProductDTO>(product);
@@ -46,36 +46,52 @@ namespace CatalogDb.API.Controllers
             return Ok(productDto);
         }
 
-        [HttpGet("Filter/ProductExactPriceFilter")]
+        [HttpGet("Filter/ExactPrice")]
         public async Task<ActionResult<IEnumerable<ProductDTO>>> GetProductsFilteredByExactPrice([FromQuery] ProductExactPriceFilter filter)
         {
             PagedList<Product> products = await UnitOfWork.ProductRepository.GetProductsFilteredByExactPriceAsync(filter);
 
+            if (products.Count == 0)
+            {
+                return NotFound("No products found with the specified exact price");
+            }
+
             return GenerateResponse(products);
         }
 
-        [HttpGet("Filter/ProductPriceCriterionFilter")]
-        public async Task<ActionResult<IEnumerable<ProductDTO>>> GetProductsFilteredByPriceCriterion([FromQuery] ProductPriceCriterionFilter filter)
+        [HttpGet("Filter/PriceCriterion")]
+        public async Task<ActionResult<IEnumerable<ProductDTO>>> GetProductsFilteredByPriceCriterion([FromQuery] ProductPriceOrderFilter filter)
         {
             PagedList<Product> products = await UnitOfWork.ProductRepository.GetProductsFilteredByPriceCriterionAsync(filter);
 
+            if (products.Count == 0)
+            {
+                return NotFound("No products found with the specified price criterion");
+            }
+
             return GenerateResponse(products);
         }
 
-        [HttpGet("Filter/ProductPriceWithCriterionFilter")]
-        public async Task<ActionResult<IEnumerable<ProductDTO>>> GetProductsFilteredByPriceWithCriterion([FromQuery] ProductPriceWithCriterionFilter filter)
+        [HttpGet("Filter/PriceAndAdditionalCriterion")]
+        public async Task<ActionResult<IEnumerable<ProductDTO>>> GetProductsFilteredByPriceWithCriterion([FromQuery] ProductAdvancedPriceFilter filter)
         {
             PagedList<Product> products = await UnitOfWork.ProductRepository.GetProductsFilteredByPriceWithCriterionAsync(filter);
 
+            if (products.Count == 0)
+            {
+                return NotFound("No products found with the specified price and additional criterion");
+            }
+
             return GenerateResponse(products);
         }
+
 
         [HttpPost]
         public async Task<ActionResult<ProductDTO>> Post(ProductDTO productDto)
         {
             if (productDto == null)
             {
-                return BadRequest();
+                return BadRequest("Invalid data received: Product data is null");
             }
 
             Product product = Mapper.Map<Product>(productDto);
@@ -93,7 +109,7 @@ namespace CatalogDb.API.Controllers
         {
             if (id != productDto.Id || productDto == null)
             {
-                return BadRequest();
+                return BadRequest("Invalid data received: Product ID mismatch or data is null");
             }
 
             Product product = Mapper.Map<Product>(productDto);
@@ -113,7 +129,7 @@ namespace CatalogDb.API.Controllers
 
             if (product == null)
             {
-                return NotFound();
+                return NotFound($"No product found with the ID {id}");
             }
 
             Product deletedProduct = UnitOfWork.Repository.Delete(product);

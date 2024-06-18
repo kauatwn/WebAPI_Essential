@@ -14,64 +14,36 @@ namespace CatalogDb.API.Repositories
 
         public async Task<PagedList<Product>> GetPagedProductsAsync(BaseFilter<Product> filter)
         {
-            IOrderedQueryable<Product> orderedProducts = GetAll().OrderBy(c => c.Id);
-
-            IQueryable<Product> products = filter.HandleFilter(orderedProducts);
-
-            var pagedProducts = await PagedList<Product>.ToPagedListAsync(products, filter.PageNumber, filter.PageSize);
-
-            if (pagedProducts.Count == 0)
-            {
-                throw new InvalidOperationException("The list of products is empty");
-            }
-
-            return pagedProducts;
+            return await HandleFilterAndPaginate(filter);
         }
 
         public async Task<PagedList<Product>> GetProductsFilteredByExactPriceAsync(ProductExactPriceFilter filter)
         {
-            IOrderedQueryable<Product> orderedProducts = GetAll().OrderBy(p => p.Id);
-
-            IQueryable<Product> filteredProducts = filter.HandleFilter(orderedProducts);
-
-            var pagedProducts = await PagedList<Product>.ToPagedListAsync(filteredProducts, filter.PageNumber, filter.PageSize);
-
-            if (pagedProducts.Count == 0)
-            {
-                throw new InvalidOperationException($"It does not exist products with the price ${filter.Price}");
-            }
-
-            return pagedProducts;
+            return await HandleFilterAndPaginate(filter);
         }
 
-        public async Task<PagedList<Product>> GetProductsFilteredByPriceCriterionAsync(ProductPriceCriterionFilter filter)
+        public async Task<PagedList<Product>> GetProductsFilteredByPriceCriterionAsync(ProductPriceOrderFilter filter)
         {
-            IOrderedQueryable<Product> orderedProducts = GetAll().OrderBy(p => p.Id);
-
-            IQueryable<Product> filteredProducts = filter.HandleFilter(orderedProducts);
-
-            var pagedProducts = await PagedList<Product>.ToPagedListAsync(filteredProducts, filter.PageNumber, filter.PageSize);
-
-            if (pagedProducts.Count == 0)
-            {
-                throw new InvalidOperationException("No products were found based on the given price criterion");
-            }
-
-            return pagedProducts;
+            return await HandleFilterAndPaginate(filter);
         }
 
-        public async Task<PagedList<Product>> GetProductsFilteredByPriceWithCriterionAsync(ProductPriceWithCriterionFilter filter)
+        public async Task<PagedList<Product>> GetProductsFilteredByPriceWithCriterionAsync(ProductAdvancedPriceFilter filter)
         {
-            IOrderedQueryable<Product> orderedProducts = GetAll().OrderBy(p => p.Id);
+            return await HandleFilterAndPaginate(filter);
+        }
 
-            IQueryable<Product> filteredProducts = filter.HandleFilter(orderedProducts);
+        private async Task<PagedList<Product>> HandleFilterAndPaginate(BaseFilter<Product> filter)
+        {
+            IOrderedQueryable<Product> orderedProducts = GetAll().OrderBy(c => c.Id);
 
-            var pagedProducts = await PagedList<Product>.ToPagedListAsync(filteredProducts, filter.PageNumber, filter.PageSize);
-
-            if (pagedProducts.Count == 0)
+            if (!orderedProducts.Any())
             {
-                throw new InvalidOperationException($"No products were found based on the given price (${filter.Price}) and price criterion");
+                throw new InvalidOperationException("The list of products is empty");
             }
+
+            IQueryable<Product> query = filter.HandleFilter(orderedProducts);
+
+            var pagedProducts = await PagedList<Product>.ToPagedListAsync(query, filter.PageNumber, filter.PageSize);
 
             return pagedProducts;
         }

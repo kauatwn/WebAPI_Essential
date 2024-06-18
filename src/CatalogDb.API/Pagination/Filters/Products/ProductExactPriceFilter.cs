@@ -10,11 +10,13 @@ namespace CatalogDb.API.Pagination.Filters.Products
         {
             if (Price.HasValue)
             {
-                filter = filter.Where(p => p.Price == Price.Value)
+                IQueryable<Product> sortedByExactPrice = filter.Where(p => p.Price == Price.Value)
                     .OrderBy(p => p.Id);
+
+                return sortedByExactPrice;
             }
 
-            return filter;
+            return base.HandleFilter(filter);
         }
     }
 }

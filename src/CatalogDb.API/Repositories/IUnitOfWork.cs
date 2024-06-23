@@ -1,10 +1,8 @@
 ﻿namespace CatalogDb.API.Repositories
 {
-    public interface IUnitOfWork<T>
+    public interface IUnitOfWork<T> where T : class
     {
         IRepository<T> Repository { get; }
-        ICategoryRepository CategoryRepository { get; }
-        IProductRepository ProductRepository { get; }
         Task CommitAsync();
     }
 }

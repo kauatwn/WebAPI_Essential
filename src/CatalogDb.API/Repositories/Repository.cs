@@ -6,7 +6,7 @@ namespace CatalogDb.API.Repositories
 {
     public class Repository<T> : IRepository<T> where T : class
     {
-        protected AppDbContext Context { get; }
+        private AppDbContext Context { get; }
 
         public Repository(AppDbContext context)
         {

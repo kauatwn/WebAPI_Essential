@@ -2,18 +2,21 @@
 
 namespace CatalogDb.API.Pagination.Filters.Categories
 {
-    public sealed class CategoryNameFilter : BaseFilter<Category>
+    public sealed class CategoryNameFilter : PaginationFilter<Category>
     {
         public string? Name { get; set; }
 
-        public override IQueryable<Category> HandleFilter(IQueryable<Category> filter)
+        public override IQueryable<Category> HandleFilter(IQueryable<Category> source)
         {
-            if (string.IsNullOrEmpty(Name))
+            if (!string.IsNullOrEmpty(Name))
             {
-                return base.HandleFilter(filter);
+                IQueryable<Category> sortedByName = source.Where(c => c.Name.Contains(Name))
+                    .OrderBy(c => c.Id);
+
+                return base.HandleFilter(sortedByName);
             }
 
-            return filter.Where(c => c.Name.Contains(Name));
+            return base.HandleFilter(source);
         }
     }
 }

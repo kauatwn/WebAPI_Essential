@@ -2,21 +2,21 @@
 
 namespace CatalogDb.API.Pagination.Filters.Products
 {
-    public sealed class ProductExactPriceFilter : BaseFilter<Product>
+    public sealed class ProductExactPriceFilter : PaginationFilter<Product>
     {
         public decimal? Price { get; set; }
 
-        public override IQueryable<Product> HandleFilter(IQueryable<Product> filter)
+        public override IQueryable<Product> HandleFilter(IQueryable<Product> source)
         {
             if (Price.HasValue)
             {
-                IQueryable<Product> sortedByExactPrice = filter.Where(p => p.Price == Price.Value)
+                IQueryable<Product> sortedByExactPrice = source.Where(p => p.Price == Price.Value)
                     .OrderBy(p => p.Id);
 
-                return sortedByExactPrice;
+                return base.HandleFilter(sortedByExactPrice);
             }
 
-            return base.HandleFilter(filter);
+            return base.HandleFilter(source);
         }
     }
 }

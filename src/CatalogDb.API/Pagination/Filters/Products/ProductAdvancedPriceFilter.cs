@@ -2,46 +2,46 @@
 
 namespace CatalogDb.API.Pagination.Filters.Products
 {
-    public sealed class ProductAdvancedPriceFilter : BaseFilter<Product>
+    public sealed class ProductAdvancedPriceFilter : PaginationFilter<Product>
     {
         public decimal? Price { get; set; }
         public string? Criterion { get; set; }
 
-        public override IQueryable<Product> HandleFilter(IQueryable<Product> filter)
+        public override IQueryable<Product> HandleFilter(IQueryable<Product> source)
         {
             if (Price.HasValue && string.IsNullOrEmpty(Criterion))
             {
-                IQueryable<Product> sortedByExactPrice = filter.Where(p => p.Price == Price.Value)
+                IQueryable<Product> sortedByExactPrice = source.Where(p => p.Price == Price.Value)
                     .OrderBy(p => p.Id);
 
-                return sortedByExactPrice;
+                return base.HandleFilter(sortedByExactPrice);
             }
 
             if (Price.HasValue && !string.IsNullOrEmpty(Criterion))
             {
                 IQueryable<Product> orderedByCriterionAccordingToPrice = Criterion.ToLower() switch
                 {
-                    "greater" => filter.Where(p => p.Price > Price.Value).OrderByDescending(p => p.Price).ThenBy(p => p.Id),
-                    "less" => filter.Where(p => p.Price < Price.Value).OrderBy(p => p.Price).ThenBy(p => p.Id),
-                    _ => filter
+                    "greater" => source.Where(p => p.Price > Price.Value).OrderByDescending(p => p.Price).ThenBy(p => p.Id),
+                    "less" => source.Where(p => p.Price < Price.Value).OrderBy(p => p.Price).ThenBy(p => p.Id),
+                    _ => source
                 };
 
-                return orderedByCriterionAccordingToPrice;
+                return base.HandleFilter(orderedByCriterionAccordingToPrice);
             }
 
             if (!Price.HasValue && !string.IsNullOrEmpty(Criterion))
             {
                 IQueryable<Product> orderedByCriterion = Criterion.ToLower() switch
                 {
-                    "greater" => filter.OrderByDescending(p => p.Price).ThenBy(p => p.Id),
-                    "less" => filter = filter.OrderBy(p => p.Price).ThenBy(p => p.Id),
-                    _ => filter
+                    "greater" => source.OrderByDescending(p => p.Price).ThenBy(p => p.Id),
+                    "less" => source = source.OrderBy(p => p.Price).ThenBy(p => p.Id),
+                    _ => source
                 };
 
-                return orderedByCriterion;
+                return base.HandleFilter(orderedByCriterion);
             }
 
-            return base.HandleFilter(filter);
+            return base.HandleFilter(source);
         }
     }
 }

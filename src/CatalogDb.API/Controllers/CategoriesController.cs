@@ -1,10 +1,8 @@
-﻿using AutoMapper;
-using CatalogDb.API.DTOs;
+﻿using CatalogDb.API.DTOs;
 using CatalogDb.API.Entities;
-using CatalogDb.API.Pagination;
 using CatalogDb.API.Pagination.Filters;
 using CatalogDb.API.Pagination.Filters.Categories;
-using CatalogDb.API.Repositories;
+using CatalogDb.API.Services;
 using Microsoft.AspNetCore.Mvc;
 using Newtonsoft.Json;
 
@@ -14,118 +12,64 @@ namespace CatalogDb.API.Controllers
     [ApiController]
     public class CategoriesController : ControllerBase
     {
-        private IUnitOfWork<Category> UnitOfWork { get; }
-        private IMapper Mapper { get; }
+        private ICategoryService CategoryService { get; }
 
-        public CategoriesController(IUnitOfWork<Category> unitOfWork, IMapper mapper)
+        public CategoriesController(ICategoryService categoryService)
         {
-            UnitOfWork = unitOfWork;
-            Mapper = mapper;
+            CategoryService = categoryService;
         }
 
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<CategoryDTO>>> GetCategories([FromQuery] BaseFilter<Category> filter)
+        public async Task<ActionResult<IEnumerable<CategoryDTO>>> GetCategories([FromQuery] PaginationFilter<Category> source)
         {
-            PagedList<Category> categories = await UnitOfWork.CategoryRepository.GetPagedCategoriesAsync(filter);
+            PaginationResultDTO<CategoryDTO> result = await CategoryService.GetPagedCategoriesAsync(source);
 
-            return GenerateResponse(categories);
+            // Cabeçalho que será enviado ao front contendo informações de paginação.
+            // Número da página atual, tamanho da página, total de itens, etc.
+            Response.Headers.Append("X-Pagination", JsonConvert.SerializeObject(result.Metadata));
+
+            return Ok(result.Items);
         }
 
         [HttpGet("{id:int}", Name = nameof(GetCategoryById))]
         public async Task<ActionResult<CategoryDTO>> GetCategoryById(int id)
         {
-            Category? category = await UnitOfWork.Repository.GetByIdAsync(c => c.Id == id);
-
-            if (category == null)
-            {
-                return NotFound();
-            }
-
-            CategoryDTO categoryDto = Mapper.Map<CategoryDTO>(category);
+            CategoryDTO categoryDto = await CategoryService.GetCategoryByIdAsync(id);
 
             return Ok(categoryDto);
         }
 
-        [HttpGet("Filter/CategoryNameFilter")]
-        public async Task<ActionResult<IEnumerable<CategoryDTO>>> GetCategoriesFilteredByName([FromQuery] CategoryNameFilter filter)
+        [HttpGet("Filter/CategoryName")]
+        public async Task<ActionResult<IEnumerable<CategoryDTO>>> GetCategoriesFilteredByName([FromQuery] CategoryNameFilter source)
         {
-            PagedList<Category> categories = await UnitOfWork.CategoryRepository.GetCategoriesFilteredByNameAsync(filter);
+            PaginationResultDTO<CategoryDTO> result = await CategoryService.GetPagedCategoriesAsync(source);
+            Response.Headers.Append("X-Pagination", JsonConvert.SerializeObject(result.Metadata));
 
-            return GenerateResponse(categories);
+            return Ok(result.Items);
         }
 
         [HttpPost]
         public async Task<ActionResult<CategoryDTO>> Post(CategoryDTO categoryDto)
         {
-            if (categoryDto == null)
-            {
-                return BadRequest();
-            }
+            CategoryDTO result = await CategoryService.CreateCategoryAsync(categoryDto);
 
-            Category category = Mapper.Map<Category>(categoryDto);
-            Category createdCategory = UnitOfWork.Repository.Create(category);
-
-            await UnitOfWork.CommitAsync();
-
-            CategoryDTO createdCategoryDto = Mapper.Map<CategoryDTO>(createdCategory);
-
-            return CreatedAtRoute(nameof(GetCategoryById), new { id = category.Id }, createdCategoryDto);
+            return CreatedAtRoute(nameof(GetCategoryById), new { id = result.Id }, result);
         }
 
         [HttpPut("{id:int}")]
         public async Task<ActionResult<CategoryDTO>> Put(int id, CategoryDTO categoryDto)
         {
-            if (id != categoryDto.Id || categoryDto == null)
-            {
-                return BadRequest();
-            }
+            CategoryDTO result = await CategoryService.UpdateCategoryAsync(id, categoryDto);
 
-            Category category = Mapper.Map<Category>(id);
-            Category updatedCategory = UnitOfWork.Repository.Update(category);
-
-            await UnitOfWork.CommitAsync();
-
-            CategoryDTO updatedCategoryDto = Mapper.Map<CategoryDTO>(updatedCategory);
-
-            return Ok(updatedCategoryDto);
+            return Ok(result);
         }
 
         [HttpDelete("{id:int}")]
         public async Task<ActionResult<CategoryDTO>> Delete(int id)
         {
-            Category? category = await UnitOfWork.Repository.GetByIdAsync(c => c.Id == id);
+            CategoryDTO result = await CategoryService.DeleteCategoryAsync(id);
 
-            if (category == null)
-            {
-                return NotFound();
-            }
-
-            Category deletedCategory = UnitOfWork.Repository.Delete(category);
-
-            await UnitOfWork.CommitAsync();
-
-            CategoryDTO deletedCategoryDto = Mapper.Map<CategoryDTO>(deletedCategory);
-
-            return Ok(deletedCategoryDto);
-        }
-
-        private ActionResult<IEnumerable<CategoryDTO>> GenerateResponse(PagedList<Category> categories)
-        {
-            object metadata = new
-            {
-                categories.TotalCount,
-                categories.PageSize,
-                categories.CurrentPage,
-                categories.TotalPages,
-                categories.HasPreviousPage,
-                categories.HasNextPage
-            };
-
-            Response.Headers.Append("X-Pagination", JsonConvert.SerializeObject(metadata));
-
-            IEnumerable<CategoryDTO> categoriesDto = Mapper.Map<IEnumerable<CategoryDTO>>(categories);
-
-            return Ok(categoriesDto);
+            return Ok(result);
         }
     }
 }

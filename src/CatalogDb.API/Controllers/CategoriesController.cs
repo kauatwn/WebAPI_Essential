@@ -2,7 +2,7 @@
 using CatalogDb.API.Entities;
 using CatalogDb.API.Pagination.Filters;
 using CatalogDb.API.Pagination.Filters.Categories;
-using CatalogDb.API.Services;
+using CatalogDb.API.Services.Interfaces;
 using Microsoft.AspNetCore.Mvc;
 using Newtonsoft.Json;
 

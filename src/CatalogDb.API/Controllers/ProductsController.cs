@@ -2,7 +2,7 @@
 using CatalogDb.API.Entities;
 using CatalogDb.API.Pagination.Filters;
 using CatalogDb.API.Pagination.Filters.Products;
-using CatalogDb.API.Services;
+using CatalogDb.API.Services.Interfaces;
 using Microsoft.AspNetCore.Mvc;
 using Newtonsoft.Json;
 
@@ -40,27 +40,27 @@ namespace CatalogDb.API.Controllers
         }
 
         [HttpGet("Filter/ExactPrice")]
-        public async Task<ActionResult<IEnumerable<ProductDTO>>> GetProductsFilteredByExactPrice([FromQuery] ProductExactPriceFilter filter)
+        public async Task<ActionResult<IEnumerable<ProductDTO>>> GetProductsFilteredByExactPrice([FromQuery] ProductExactPriceFilter source)
         {
-            PaginationResultDTO<ProductDTO> result = await ProductService.GetProductsByExactPriceAsync(filter);
+            PaginationResultDTO<ProductDTO> result = await ProductService.GetProductsByExactPriceAsync(source);
             Response.Headers.Append("X-Pagination", JsonConvert.SerializeObject(result.Metadata));
 
             return Ok(result.Items);
         }
 
         [HttpGet("Filter/PriceCriterion")]
-        public async Task<ActionResult<IEnumerable<ProductDTO>>> GetProductsFilteredByPriceCriterion([FromQuery] ProductPriceOrderFilter filter)
+        public async Task<ActionResult<IEnumerable<ProductDTO>>> GetProductsFilteredByPriceCriterion([FromQuery] ProductPriceOrderFilter source)
         {
-            PaginationResultDTO<ProductDTO> result = await ProductService.GetProductsByPriceCriterionAsync(filter);
+            PaginationResultDTO<ProductDTO> result = await ProductService.GetProductsByPriceCriterionAsync(source);
             Response.Headers.Append("X-Pagination", JsonConvert.SerializeObject(result.Metadata));
 
             return Ok(result.Items);
         }
 
         [HttpGet("Filter/PriceAndAdditionalCriterion")]
-        public async Task<ActionResult<IEnumerable<ProductDTO>>> GetProductsByAdvancedPriceFilter([FromQuery] ProductAdvancedPriceFilter filter)
+        public async Task<ActionResult<IEnumerable<ProductDTO>>> GetProductsByAdvancedPriceFilter([FromQuery] ProductAdvancedPriceFilter source)
         {
-            PaginationResultDTO<ProductDTO> result = await ProductService.GetProductsByAdvancedPriceFilterAsync(filter);
+            PaginationResultDTO<ProductDTO> result = await ProductService.GetProductsByAdvancedPriceFilterAsync(source);
             Response.Headers.Append("X-Pagination", JsonConvert.SerializeObject(result.Metadata));
 
             return Ok(result.Items);

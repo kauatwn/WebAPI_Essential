@@ -1,4 +1,4 @@
-﻿namespace CatalogDb.API.Repositories
+﻿namespace CatalogDb.API.Repositories.Interfaces
 {
     public interface IUnitOfWork<T> where T : class
     {

@@ -1,4 +1,5 @@
 ﻿using CatalogDb.API.Context;
+using CatalogDb.API.Repositories.Interfaces;
 
 namespace CatalogDb.API.Repositories
 {

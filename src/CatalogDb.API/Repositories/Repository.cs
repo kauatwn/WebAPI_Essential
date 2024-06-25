@@ -1,4 +1,5 @@
 ﻿using CatalogDb.API.Context;
+using CatalogDb.API.Repositories.Interfaces;
 using Microsoft.EntityFrameworkCore;
 using System.Linq.Expressions;
 

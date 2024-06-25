@@ -1,6 +1,6 @@
 ﻿using System.Linq.Expressions;
 
-namespace CatalogDb.API.Repositories
+namespace CatalogDb.API.Repositories.Interfaces
 {
     public interface IRepository<T> where T : class
     {

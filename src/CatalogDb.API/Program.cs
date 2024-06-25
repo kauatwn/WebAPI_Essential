@@ -3,7 +3,9 @@ using CatalogDb.API.DTOs.Mappings;
 using CatalogDb.API.Entities;
 using CatalogDb.API.Extensions;
 using CatalogDb.API.Repositories;
+using CatalogDb.API.Repositories.Interfaces;
 using CatalogDb.API.Services;
+using CatalogDb.API.Services.Interfaces;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
@@ -112,7 +114,9 @@ builder.Services.AddRateLimiter(options =>
 
 builder.Services.AddScoped(typeof(IRepository<>), typeof(Repository<>));
 builder.Services.AddScoped(typeof(IUnitOfWork<>), typeof(UnitOfWork<>));
+builder.Services.AddScoped<IAuthService, AuthService>();
 builder.Services.AddScoped<ITokenService, TokenService>();
+builder.Services.AddScoped<ICategoryService, CategoryService>();
 builder.Services.AddScoped<IProductService, ProductService>();
 builder.Services.AddAutoMapper(typeof(DTOsMappingProfile));
 

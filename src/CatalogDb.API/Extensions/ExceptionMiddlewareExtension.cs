@@ -21,6 +21,10 @@ namespace CatalogDb.API.Extensions
                     {
                         ResourceNotFoundException => StatusCodes.Status404NotFound,
                         ArgumentException => StatusCodes.Status400BadRequest,
+                        UnauthorizedAccessException => StatusCodes.Status401Unauthorized,
+                        RoleAlreadyExistsException or
+                        UserAlreadyInRoleException or
+                        EmailAlreadyInUseException => StatusCodes.Status409Conflict,
                         _ => StatusCodes.Status500InternalServerError
                     };
 

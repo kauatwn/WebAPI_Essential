@@ -4,7 +4,8 @@ using CatalogDb.API.Entities;
 using CatalogDb.API.Exceptions;
 using CatalogDb.API.Pagination.Filters;
 using CatalogDb.API.Pagination.Filters.Categories;
-using CatalogDb.API.Repositories;
+using CatalogDb.API.Repositories.Interfaces;
+using CatalogDb.API.Services.Interfaces;
 using Microsoft.EntityFrameworkCore;
 
 namespace CatalogDb.API.Services

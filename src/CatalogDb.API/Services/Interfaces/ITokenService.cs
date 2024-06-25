@@ -1,7 +1,7 @@
 ﻿using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 
-namespace CatalogDb.API.Services
+namespace CatalogDb.API.Services.Interfaces
 {
     public interface ITokenService
     {

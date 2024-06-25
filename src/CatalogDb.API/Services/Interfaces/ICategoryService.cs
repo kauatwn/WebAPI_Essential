@@ -3,7 +3,7 @@ using CatalogDb.API.Entities;
 using CatalogDb.API.Pagination.Filters;
 using CatalogDb.API.Pagination.Filters.Categories;
 
-namespace CatalogDb.API.Services
+namespace CatalogDb.API.Services.Interfaces
 {
     public interface ICategoryService
     {

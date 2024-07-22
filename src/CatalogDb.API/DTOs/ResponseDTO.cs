@@ -1,4 +1,6 @@
-﻿namespace CatalogDb.API.DTOs
+﻿using System.Net;
+
+namespace CatalogDb.API.DTOs
 {
-    public record ResponseDTO(string Status, string Message);
+    public record ResponseDTO(HttpStatusCode Status, string Message);
 }
